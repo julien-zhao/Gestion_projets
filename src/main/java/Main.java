@@ -2,7 +2,7 @@ import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, World!");
+        System.out.println("Test PC ");
         Formation miageIf = new Formation(1, "MIAGE-IF", "Initiale");
         Etudiant etudiant1 = new Etudiant(101, "John", "Doe", miageIf);
         Etudiant etudiant2 = new Etudiant(102, "Jane", "Smith", miageIf);
