@@ -1,14 +1,54 @@
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import java.util.Date;
 
-public class Main {
+public class Main extends Application {
     public static void main(String[] args) {
-        System.out.println("Test PC ");
-        Formation miageIf = new Formation(1, "MIAGE-IF", "Initiale");
-        Etudiant etudiant1 = new Etudiant(101, "John", "Doe", miageIf);
-        Etudiant etudiant2 = new Etudiant(102, "Jane", "Smith", miageIf);
 
-        Projet projet1 = new Projet(1, "Entrepôt de données", "Sujet 1", new Date());
-        Binome binome1 = new Binome(1, 1, etudiant1, etudiant2, 8.5f, 9.0f, new Date());
-        projet1.ajouterBinome(binome1);
+        launch(args);
+    }
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Gestion des Projets Étudiants");
+
+        // Créez des éléments d'interface utilisateur (labels, boutons, champs de texte, etc.)
+        Label labelEtudiants = new Label("Liste des Étudiants:");
+        ListView<String> etudiantsListView = new ListView<>();
+
+        Label labelFormations = new Label("Liste des Formations:");
+        ListView<String> formationsListView = new ListView<>();
+
+        Label labelProjets = new Label("Liste des Projets:");
+        ListView<String> projetsListView = new ListView<>();
+
+        Button ajouterEtudiantButton = new Button("Ajouter Étudiant");
+        Button ajouterFormationButton = new Button("Ajouter Formation");
+        Button ajouterProjetButton = new Button("Ajouter Projet");
+
+        // Créez des dispositions pour organiser les éléments d'interface utilisateur
+        VBox leftVBox = new VBox(labelEtudiants, etudiantsListView, labelFormations, formationsListView);
+        VBox rightVBox = new VBox(labelProjets, projetsListView);
+
+        HBox buttonsHBox = new HBox(ajouterEtudiantButton, ajouterFormationButton, ajouterProjetButton);
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setLeft(leftVBox);
+        borderPane.setCenter(rightVBox);
+        borderPane.setBottom(buttonsHBox);
+
+        // Créez une scène avec la disposition
+        Scene scene = new Scene(borderPane, 800, 600);
+
+        // Configurez la scène et affichez-la
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }
