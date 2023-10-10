@@ -22,4 +22,43 @@ public class Projet {
 
     // Getters et setters
 
+    public int getNumero() {
+        return numero;
+    }
+
+    public void setNumero(int numero) {
+        this.numero = numero;
+    }
+
+    public String getMatiere() {
+        return matiere;
+    }
+
+    public void setMatiere(String matiere) {
+        this.matiere = matiere;
+    }
+
+    public String getSujet() {
+        return sujet;
+    }
+
+    public void setSujet(String sujet) {
+        this.sujet = sujet;
+    }
+
+    public Date getDateRemisePrevue() {
+        return dateRemisePrevue;
+    }
+
+    public void setDateRemisePrevue(Date dateRemisePrevue) {
+        this.dateRemisePrevue = dateRemisePrevue;
+    }
+
+    public List<Binome> getBinomes() {
+        return binomes;
+    }
+
+    public void setBinomes(List<Binome> binomes) {
+        this.binomes = binomes;
+    }
 }
