@@ -15,6 +15,7 @@ public class Main extends Application {
         //ZHAO WENBO
         launch(args);
     }
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Gestion des Projets Étudiants");
@@ -50,5 +51,6 @@ public class Main extends Application {
         // Configurez la scène et affichez-la
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 }
