@@ -20,6 +20,7 @@ public class Menu {
         JLabel gestionEtudiantsLabel = new JLabel("Gestion des Étudiants");
         JLabel gestionBinomesLabel = new JLabel("Gestion des Binômes");
         JLabel gestionProjetsLabel = new JLabel("Gestion des Projets");
+        JLabel gestionNotesLabel = new JLabel("Gestion des Notes");
 
         // Configuration des contraintes pour le GridBagLayout
         GridBagConstraints gbc = new GridBagConstraints();
@@ -33,6 +34,8 @@ public class Menu {
         labelPanel.add(addHoverEffect(gestionBinomesLabel), gbc);
         gbc.gridy = 2;
         labelPanel.add(addHoverEffect(gestionProjetsLabel), gbc);
+        gbc.gridy = 3;
+        labelPanel.add(addHoverEffect(gestionNotesLabel), gbc);
     }
 
     public JLabel addHoverEffect(JLabel label) {
@@ -46,7 +49,10 @@ public class Menu {
                     Gestion_binome gestion_binome = new Gestion_binome();
                 } else if (label.getText().equals("Gestion des Projets")) {
                     Gestion_projet gestion_projet = new Gestion_projet();
+                } else if (label.getText().equals("Gestion des Notes")) {
+                    Gestion_note gestion_note = new Gestion_note();
                 }
+
                 frame.setVisible(false); // Masquer la fenêtre du menu
             }
 
@@ -67,8 +73,5 @@ public class Menu {
             }
         });
         return label;
-    }
-    public void showMenu() {
-        frame.setVisible(true); // Afficher à nouveau la fenêtre du menu
     }
 }

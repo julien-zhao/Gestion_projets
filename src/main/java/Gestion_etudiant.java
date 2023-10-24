@@ -1,9 +1,27 @@
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.*;
+import java.text.Collator;
+import java.util.Comparator;
 
 public class Gestion_etudiant{
     private static Connection connection = null;
@@ -28,34 +46,88 @@ public class Gestion_etudiant{
         // Création du panneau principal
 
         JTable studentTable = new JTable(tableModel);
+
+        // Activez le tri sur le tableau
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        studentTable.setRowSorter(sorter);
+
+        // Pour trier les colonnes en ignorant la casse (insensible à la casse)
+        TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
+            @Override
+            public Comparator<?> getComparator(int column) {
+                if (column == 1 || column == 2 || column == 3 || column == 4) { // Les colonnes 1, 2, 3 et 4 sont celles qui doivent être triées de manière insensible à la casse
+                    return Collator.getInstance();
+                }
+                return super.getComparator(column);
+            }
+        };
+        studentTable.setRowSorter(caseInsensitiveSorter);
+
+        // Création du champ de recherche rapide
+        JTextField searchField = new JTextField(20);
+        searchField.setToolTipText("Recherche rapide"); // Astuce pour afficher un texte d'infobulle
+
+
         JScrollPane tableScrollPane = new JScrollPane(studentTable);
 
         // Création des boutons pour ajouter et supprimer des étudiants
         JButton addStudentButton = new JButton("Ajouter Étudiant");
         JButton deleteStudentButton = new JButton("Supprimer Étudiant");
+        JButton generatePDFButton = new JButton("Générer en PDF"); // Bouton pour générer le PDF
+        JButton retourMenuButton = new JButton("Retour au Menu");
 
+        TableColumnModel tableColumnModel = studentTable.getColumnModel();
+        tableColumnModel.getColumn(0).setMaxWidth(0);
+        tableColumnModel.getColumn(0).setMinWidth(0);
+        tableColumnModel.getColumn(0).setPreferredWidth(0);
+        tableColumnModel.getColumn(0).setResizable(false);
 
-        // Création du formulaire pour ajouter un étudiant
-        JTextField studentNameField = new JTextField(10);
-        JTextField studentFirstNameField = new JTextField(10);
-        JTextField studentFormationField = new JTextField(10);
-        JTextField studentPromotionField = new JTextField(10);
+        retourMenuButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Fermez l'interface de gestion des binômes et affichez l'interface de menu
+                frame.dispose(); // Ferme l'interface de gestion des binômes
+                new Menu(); // Crée une nouvelle instance de l'interface de menu
+            }
+        });
 
         // Ajout des composants au panneau principal
         JPanel studentFormPanel = new JPanel(new GridLayout(6, 2));
-        studentFormPanel.add(new JLabel("Nom :"));
-        studentFormPanel.add(studentNameField);
-        studentFormPanel.add(new JLabel("Prénom :"));
-        studentFormPanel.add(studentFirstNameField);
-        studentFormPanel.add(new JLabel("Formation :"));
-        studentFormPanel.add(studentFormationField);
-        studentFormPanel.add(new JLabel("Promotion :"));
-        studentFormPanel.add(studentPromotionField);
+        JPanel searchPanel = new JPanel();
+        searchPanel.add(new JLabel("Recherche : "));
+        searchPanel.add(searchField);
 
+        // Ajout du panneau de recherche au panneau principal
+        mainPanel.add(searchPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(studentFormPanel, BorderLayout.EAST);
-        mainPanel.add(addStudentButton, BorderLayout.SOUTH);
-        mainPanel.add(deleteStudentButton, BorderLayout.NORTH);
+
+        // Créez un panneau pour les boutons "Ajouter Etudiant" et "Retour au Menu"
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(addStudentButton);
+        buttonPanel.add(deleteStudentButton);
+        buttonPanel.add(generatePDFButton); // Ajoutez le bouton "Générer en PDF"
+        buttonPanel.add(retourMenuButton);
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Gestionnaire d'événements pour le champ de recherche rapide
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filterTable(searchField.getText(),studentTable);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filterTable(searchField.getText(),studentTable);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                // Les mises à jour d'attributs ne sont pas traitées ici
+            }
+        });
 
         frame.add(mainPanel);
         frame.pack();
@@ -63,76 +135,14 @@ public class Gestion_etudiant{
         loadStudentsFromDatabase();
 
 
+
+
+
 // Gestionnaire d'événements pour le bouton "Ajouter Étudiant"
         addStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Récupérer les données du formulaire
-                String nom = studentNameField.getText();
-                String prenom = studentFirstNameField.getText();
-                String formation = studentFormationField.getText();
-                String promotion = studentPromotionField.getText();
-                int formationNumero = -1; // Par défaut, en cas de correspondance non trouvée
-
-                // Utilisez une structure switch pour déterminer le numéro de formation en fonction de formation et promotion
-                switch (formation.toLowerCase() + promotion.toLowerCase()) { // Convertir en minuscules pour ignorer la casse
-                    case "idinitial":
-                        formationNumero = 1;
-                        break;
-                    case "idalternance":
-                        formationNumero = 2;
-                        break;
-                    case "idcontinue":
-                        formationNumero = 3;
-                        break;
-                    case "sitninitial":
-                        formationNumero = 4;
-                        break;
-                    case "sitnalternance":
-                        formationNumero = 5;
-                        break;
-                    case "sitncontinue":
-                        formationNumero = 6;
-                        break;
-                    case "ifinitial":
-                        formationNumero = 7;
-                        break;
-                    case "ifalternance":
-                        formationNumero = 8;
-                        break;
-                    case "ifcontinue":
-                        formationNumero = 9;
-                        break;
-                    default:
-                        JOptionPane.showMessageDialog(frame, "Formation ou promotion non valides", "Erreur", JOptionPane.ERROR_MESSAGE);
-                        break;
-                }
-
-                if (formationNumero != -1) {
-                    try {
-                        // Créer une requête SQL d'insertion en utilisant le numéro de formation déterminé
-                        String sql = "INSERT INTO Etudiants (nom, prenom, formation_id) VALUES (?, ?, ?)";
-
-                        PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                        preparedStatement.setString(1, nom);
-                        preparedStatement.setString(2, prenom);
-                        preparedStatement.setInt(3, formationNumero);
-
-                        // Exécutez la requête d'insertion
-                        preparedStatement.executeUpdate();
-
-                        // Ajouter les données à la table
-                        tableModel.addRow(new Object[]{getLastInsertedStudentId(), nom, prenom, formation, promotion});
-
-                        // Effacer les champs du formulaire
-                        studentNameField.setText("");
-                        studentFirstNameField.setText("");
-                        studentFormationField.setText("");
-                        studentPromotionField.setText("");
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
-                }
+                new StudentAddDialog(connection,frame,tableModel);
             }
         });
 
@@ -143,35 +153,34 @@ public class Gestion_etudiant{
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = studentTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    // Récupérez l'ID de l'étudiant sélectionné dans le tableau
                     int studentIdToDelete = (int) tableModel.getValueAt(selectedRow, 0);
 
-                    try {
-                        // Créez une requête SQL de suppression de l'étudiant par ID
-                        String deleteSql = "DELETE FROM Etudiants WHERE numero = ?";
+                    // Demandez une confirmation avant de supprimer l'étudiant
+                    int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer cet étudiant ?", "Confirmation", JOptionPane.YES_NO_OPTION);
 
-                        PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
-                        preparedStatement.setInt(1, studentIdToDelete);
-
-                        // Exécutez la requête de suppression
-                        preparedStatement.executeUpdate();
-
-                        // Supprimez également la ligne du tableau
-                        tableModel.removeRow(selectedRow);
-
-                        // Effacez les champs du formulaire
-                        studentNameField.setText("");
-                        studentFirstNameField.setText("");
-                        studentFormationField.setText("");
-                        studentPromotionField.setText("");
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    if (choice == JOptionPane.YES_OPTION) {
+                        try {
+                            String deleteSql = "DELETE FROM Etudiants WHERE numero = ?";
+                            PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
+                            preparedStatement.setInt(1, studentIdToDelete);
+                            preparedStatement.executeUpdate();
+                            tableModel.removeRow(selectedRow);
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }
         });
 
 
+        // Gestionnaire d'événements pour le bouton "Générer en PDF"
+        generatePDFButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generatePDF();
+            }
+        });
 
     }
 
@@ -243,19 +252,69 @@ public class Gestion_etudiant{
         return "";
     }
 
-    // Méthode pour obtenir le dernier numéro d'étudiant inséré
-    private int getLastInsertedStudentId() {
-        int lastInsertedId = -1;
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT LAST_INSERT_ID() as last_id");
-            if (resultSet.next()) {
-                lastInsertedId = resultSet.getInt("last_id");
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        return lastInsertedId;
+    // Fonction pour filtrer le tableau en fonction du texte de recherche
+    private void filterTable(String searchText,JTable studentTable) {
+        RowFilter<DefaultTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + searchText, 1, 2, 3, 4);
+        TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) studentTable.getRowSorter();
+        sorter.setRowFilter(rowFilter);
     }
+
+    private void generatePDF() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Enregistrer le PDF");
+
+        // Définissez le filtre de fichier pour afficher uniquement les fichiers PDF
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Fichiers PDF (*.pdf)", "pdf");
+        fileChooser.setFileFilter(filter);
+
+        int userSelection = fileChooser.showSaveDialog(frame);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            try {
+                // Obtenez le fichier sélectionné par l'utilisateur
+                File fileToSave = fileChooser.getSelectedFile();
+
+                if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                    // Assurez-vous que l'extension est .pdf
+                    fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".pdf");
+                }
+
+                Document document = new Document();
+                PdfWriter.getInstance(document, new FileOutputStream(fileToSave));
+                document.open();
+
+                // Titre du document
+                document.add(new Paragraph("Liste des étudiants"));
+                document.add(new Paragraph("\n")); // Ajout d'un paragraphe vide (saut de ligne)
+
+                // Créez une table avec une colonne de moins que le modèle de table
+                PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount() - 1); // Moins une colonne (la colonne "ID" n'est pas incluse)
+                pdfTable.setWidthPercentage(100);
+
+                // En-têtes de colonne (en excluant la colonne "ID")
+                for (int col = 1; col < tableModel.getColumnCount(); col++) {
+                    PdfPCell cell = new PdfPCell(new Phrase(tableModel.getColumnName(col)));
+                    pdfTable.addCell(cell);
+                }
+
+                // Contenu du tableau (en excluant la colonne "ID")
+                for (int row = 0; row < tableModel.getRowCount(); row++) {
+                    for (int col = 1; col < tableModel.getColumnCount(); col++) {
+                        PdfPCell cell = new PdfPCell(new Phrase(tableModel.getValueAt(row, col).toString()));
+                        pdfTable.addCell(cell);
+                    }
+                }
+
+                document.add(pdfTable);
+                document.close();
+
+                JOptionPane.showMessageDialog(frame, "Le PDF a été généré avec succès et enregistré dans " + fileToSave.getAbsolutePath(), "PDF généré", JOptionPane.INFORMATION_MESSAGE);
+            } catch (DocumentException | IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Une erreur s'est produite lors de la génération du PDF.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
 
 }
