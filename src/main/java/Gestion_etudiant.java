@@ -27,6 +27,7 @@ public class Gestion_etudiant{
     private static Connection connection = null;
     private static DefaultTableModel tableModel;
 
+
     JFrame frame = new JFrame("Gestion des Projets Étudiants");
     Gestion_etudiant(){
         try {
@@ -129,12 +130,13 @@ public class Gestion_etudiant{
             }
         });
 
+        JTabbedPane projectTabs = new JTabbedPane();
+        frame.add(projectTabs, BorderLayout.CENTER);
+
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
         loadStudentsFromDatabase();
-
-
 
 
 
@@ -147,6 +149,7 @@ public class Gestion_etudiant{
         });
 
 
+        // Gestionnaire d'événements pour le bouton "Supprimer Étudiant"
         // Gestionnaire d'événements pour le bouton "Supprimer Étudiant"
         deleteStudentButton.addActionListener(new ActionListener() {
             @Override
@@ -169,6 +172,8 @@ public class Gestion_etudiant{
                             ex.printStackTrace();
                         }
                     }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Veuillez sélectionner un étudiant à supprimer.", "Avertissement", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -315,6 +320,5 @@ public class Gestion_etudiant{
             }
         }
     }
-
 
 }

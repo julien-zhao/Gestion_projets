@@ -3,9 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import javax.swing.text.MaskFormatter;
 import java.text.ParseException;
 
@@ -31,6 +29,7 @@ public class ProjectAddDialog {
 
         try {
             MaskFormatter dateMask = new MaskFormatter("####-##-##");
+            dateMask.setPlaceholderCharacter('_'); // Caractère de remplacement pour les tirets
             dateRemiseField = new JFormattedTextField(dateMask);
             dateRemiseField.setColumns(10);
         } catch (ParseException e) {
@@ -53,6 +52,8 @@ public class ProjectAddDialog {
                 if (validateFields()) {
                     try {
                         addProject();
+                        // Afficher la fenêtre de confirmation
+                        JOptionPane.showMessageDialog(frame, "Projet ajouté avec succès!", "Confirmation", JOptionPane.INFORMATION_MESSAGE);
                     } catch (SQLException ex) {
                         JOptionPane.showMessageDialog(frame, "Erreur lors de l'ajout du projet : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
@@ -91,7 +92,7 @@ public class ProjectAddDialog {
             preparedStatement.setString(3, dateRemise);
             preparedStatement.executeUpdate();
 
-            tableModel.addRow(new Object[]{matiere, sujet, dateRemise});
+            tableModel.addRow(new Object[]{getLastInsertedProjectId(),matiere, sujet, dateRemise});
             frame.dispose();
         } else {
             throw new SQLException("Format de date incorrect. Utilisez le format YYYY-MM-DD.");
@@ -133,4 +134,19 @@ public class ProjectAddDialog {
         sujetField.setText("");
         dateRemiseField.setValue(null);
     }
+
+    private int getLastInsertedProjectId() {
+        int lastInsertedId = -1;
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT LAST_INSERT_ID() as last_id");
+            if (resultSet.next()) {
+                lastInsertedId = resultSet.getInt("last_id");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return lastInsertedId;
+    }
+
 }
