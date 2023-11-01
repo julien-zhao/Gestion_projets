@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -19,7 +18,6 @@ public class Menu {
         // Créez des JLabel pour les options
         JLabel gestionEtudiantsLabel = new JLabel("Gestion des Étudiants");
         JLabel gestionProjetsLabel = new JLabel("Gestion des Projets");
-        JLabel gestionNotesLabel = new JLabel("Gestion des Notes");
 
         // Configuration des contraintes pour le GridBagLayout
         GridBagConstraints gbc = new GridBagConstraints();
@@ -31,8 +29,6 @@ public class Menu {
         labelPanel.add(addHoverEffect(gestionEtudiantsLabel), gbc);
         gbc.gridy = 1;
         labelPanel.add(addHoverEffect(gestionProjetsLabel), gbc);
-        gbc.gridy = 2;
-        labelPanel.add(addHoverEffect(gestionNotesLabel), gbc);
     }
 
     public JLabel addHoverEffect(JLabel label) {
@@ -44,10 +40,7 @@ public class Menu {
                     Gestion_etudiant gestion_etudiant = new Gestion_etudiant();
                 } else if (label.getText().equals("Gestion des Projets")) {
                     Gestion_projet gestion_projet = new Gestion_projet();
-                } else if (label.getText().equals("Gestion des Notes")) {
-                    Gestion_note gestion_note = new Gestion_note();
                 }
-
                 frame.setVisible(false); // Masquer la fenêtre du menu
             }
 

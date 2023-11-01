@@ -47,7 +47,6 @@ public class Gestion_etudiant{
         // Création du panneau principal
 
         JTable studentTable = new JTable(tableModel);
-
         // Activez le tri sur le tableau
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         studentTable.setRowSorter(sorter);

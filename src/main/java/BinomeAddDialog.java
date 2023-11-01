@@ -77,10 +77,12 @@ public class BinomeAddDialog extends JFrame {
                 String soutenance2 = soutenance2Field.getText();
                 String dateRemiseEffective = dateRemiseEffectiveField.getText().replace('_', '-');
 
-                if (!selectedStudent1.isEmpty() && !selectedStudent2.isEmpty() && !rapport.isEmpty() && !soutenance1.isEmpty() && !soutenance2.isEmpty() && !dateRemiseEffective.isEmpty() && isValidDateFormat(dateRemiseEffective)) {
+                if (!selectedStudent1.isEmpty() && (!selectedStudent2.isEmpty() || selectedStudent2 == null) && !rapport.isEmpty() && !soutenance1.isEmpty() && !soutenance2.isEmpty() && !dateRemiseEffective.isEmpty() && isValidDateFormat(dateRemiseEffective) && isValidGrade(rapport) && isValidGrade(soutenance1) && isValidGrade(soutenance2)) {
                     int projectId = projectNumber;
                     int student1Id = getStudentId(selectedStudent1);
                     int student2Id = getStudentId(selectedStudent2);
+
+
 
                     // Utilisez une variable pour construire le nom de la table
                     String tableName = "Project_" + projectId;
@@ -136,7 +138,7 @@ public class BinomeAddDialog extends JFrame {
                         ex.printStackTrace();
                     }
                 } else {
-                    JOptionPane.showMessageDialog(parentFrame, "Veuillez remplir tous les champs correctement.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Veuillez remplir tous les champs correctement et assurez-vous que les notes sont entre 0 et 20.","Erreur", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -216,5 +218,36 @@ public class BinomeAddDialog extends JFrame {
         }
         return model;
     }
+
+
+
+    /***
+     private DefaultComboBoxModel<String> getStudentOptions() {
+     DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+     try {
+     String query = "SELECT CONCAT(nom, ' ', prenom) as nom_complet FROM Etudiants";
+     PreparedStatement preparedStatement = connection.prepareStatement(query);
+     ResultSet resultSet = preparedStatement.executeQuery();
+     while (resultSet.next()) {
+     String studentName = resultSet.getString("nom_complet");
+     model.addElement(studentName);
+     }
+     } catch (SQLException ex) {
+     ex.printStackTrace();
+     }
+     return model;
+     }
+     **/
+
+    // Fonction de validation pour vérifier si une chaîne est un nombre entre 0 et 20
+    private boolean isValidGrade(String grade) {
+        try {
+            double value = Double.parseDouble(grade);
+            return value >= 0 && value <= 20;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 
 }
