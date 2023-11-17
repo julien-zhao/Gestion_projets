@@ -12,9 +12,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,35 +29,43 @@ public class Gestion_binome {
     JFrame frame;
     int projectNumber;
 
-    public Gestion_binome(int projectNumber) {
-        this.projectNumber= projectNumber;
 
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
-        }
-        frame = new JFrame("Gestion des Binômes du projet : " + getProjectName(projectNumber));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(1200, 600));
+
+
+    public Gestion_binome(int projectNumber) {
+
+        // 初始化projectNumber
+        this.projectNumber = projectNumber;
+
+        // 建立数据库连接
+        establishDatabaseConnection();
+
+        // 设置主窗口属性
+        setupMainFrame();
+
+        // 设置窗体图标
+        setIcons();
+
+        // 创建主面板
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // Création du tableau pour afficher la liste des binômes
+        // 创建binome列表的表格
         String[] columnNames = {"ID", "Projet", "Étudiant 1", "Étudiant 2", "Note Rapport", "Note Soutenance Étudiant 1", "Note Soutenance Étudiant 2", "Date de Remise Effective"};
         tableModel = new DefaultTableModel(columnNames, 0);
 
-        // Création du panneau principal
+        // 创建表格并启用排序
         JTable binomeTable = new JTable(tableModel);
-        // Activez le tri sur le tableau
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         binomeTable.setRowSorter(sorter);
 
-        // Pour trier les colonnes en ignorant la casse (insensible à la casse)
+        // 隐藏表格的网格线
+        binomeTable.setShowGrid(false);
+
+        // 为表格启用不区分大小写的排序
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
-                if (column == 1 || column == 2 || column == 3 || column == 4 || column == 5 || column == 6 || column == 7 || column == 8) {
+                if (column >= 1 && column <= 8) {
                     return Collator.getInstance();
                 }
                 return super.getComparator(column);
@@ -68,18 +74,18 @@ public class Gestion_binome {
         binomeTable.setRowSorter(caseInsensitiveSorter);
         JScrollPane tableScrollPane = new JScrollPane(binomeTable);
 
+        // 创建搜索字段
         JTextField searchField = new JTextField(20);
-        searchField.setToolTipText("Recherche rapide"); // Astuce pour afficher un texte d'infobulle
+        searchField.setToolTipText("Recherche rapide"); // 提示用户的工具提示文本
 
-
-        // Création des boutons pour ajouter et supprimer des binômes
+        // 创建按钮
         JButton addBinomeButton = new JButton("Ajouter Binôme");
         JButton deleteBinomeButton = new JButton("Supprimer Binôme");
         JButton afficheNoteButton = new JButton("Affiche note");
-        JButton generatePDFButton = new JButton("Générer en PDF"); // Bouton pour générer le PDF
-        JButton retourProjectButton = new JButton("Retour au Project");// Bouton "Retour au Project"
+        JButton generatePDFButton = new JButton("Générer en PDF");
+        JButton retourProjectButton = new JButton("Retour au Project");
 
-        // On masque la colonne ID
+        // 隐藏ID和项目列
         TableColumnModel tableColumnModel = binomeTable.getColumnModel();
         tableColumnModel.getColumn(0).setMaxWidth(0);
         tableColumnModel.getColumn(0).setMinWidth(0);
@@ -90,7 +96,7 @@ public class Gestion_binome {
         tableColumnModel.getColumn(1).setPreferredWidth(0);
         tableColumnModel.getColumn(1).setResizable(false);
 
-
+        // 添加搜索字段的文本变更监听器
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -104,59 +110,67 @@ public class Gestion_binome {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                // Les mises à jour d'attributs ne sont pas traitées ici
+                // 不处理属性更改
             }
         });
 
 
+        // 添加返回项目按钮的事件监听器
         retourProjectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Fermez l'interface de gestion des binômes et revenez à l'instance existante de Gestion_projet
+                // 关闭配对管理界面，返回 Gestion_projet 的现有实例
                 frame.dispose(); // Ferme l'interface de gestion des binômes
                 if (Gestion_projet.currentInstance != null) {
                     Gestion_projet.currentInstance.frame.setVisible(true); // Affichez à nouveau l'instance existante de Gestion_projet
                 }
             }
         });
-        // Ajout des composants au panneau principal
+
+
+        // 创建按钮面板
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(addBinomeButton);
         buttonPanel.add(deleteBinomeButton);
         buttonPanel.add(afficheNoteButton);
-        buttonPanel.add(generatePDFButton); // Ajoutez le bouton "Générer en PDF"
+        buttonPanel.add(generatePDFButton);
         buttonPanel.add(retourProjectButton);
 
 
+        // 创建搜索面板
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Recherche : "));
         searchPanel.add(searchField);
 
+
+        // 将组件添加到主面板
         mainPanel.add(searchPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
 
+        // 将主面板添加到窗口
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
 
-        // Vérifier l'existence de la table de binômes
+        // 检查binome是否存在
         boolean binomeTableExists = checkTableExistence(projectNumber);
 
         if (!binomeTableExists) {
-            // Créer la table de binômes
+            // 如果不存在，则创建binome表
             createBinomeTable(projectNumber);
         }
+        // 从数据库加载binome信息
         loadBinomesFromDatabase(projectNumber);
-
-        // Gestionnaire d'événements pour le bouton "Ajouter Binôme"
+        // 添加"添加binome"按钮的事件监听器
         addBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BinomeAddDialog(connection, frame, tableModel,projectNumber);
             }
         });
-
+        // 添加"删除binome"按钮的事件监听器
         deleteBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -173,9 +187,7 @@ public class Gestion_binome {
                 }
             }
         });
-
-
-
+        // 添加"显示成绩"按钮的事件监听器
         afficheNoteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -184,18 +196,19 @@ public class Gestion_binome {
             }
         });
 
-        // Ajoutez des gestionnaires d'événements de modification de cellule personnalisés pour les colonnes de notes
+
+        // 为成绩列添加自定义单元格编辑事件处理器
         binomeTable.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JTextField()) {
             @Override
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // Vérifiez si la valeur est un nombre valide en utilisant Double.parseDouble
+                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // Empêche la fin de l'édition
+                    return false;// 防止编辑结束
                 }
             }
         });
@@ -204,12 +217,12 @@ public class Gestion_binome {
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // Vérifiez si la valeur est un nombre valide en utilisant Double.parseDouble
+                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // Empêche la fin de l'édition
+                    return false; // 防止编辑结束
                 }
             }
         });
@@ -218,19 +231,18 @@ public class Gestion_binome {
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // Vérifiez si la valeur est un nombre valide en utilisant Double.parseDouble
+                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // Empêche la fin de l'édition
+                    return false; // 防止编辑结束
                 }
             }
         });
 
 
-
-// Ajoutez des gestionnaires d'événements de modification de cellule personnalisés pour les colonnes de notes
+        // Ajoutez des gestionnaires d'événements de modification de cellule personnalisés pour les colonnes de notes
         DefaultCellEditor numberCellEditor = new DefaultCellEditor(new JTextField()) {
             @Override
             public boolean stopCellEditing() {
@@ -264,8 +276,6 @@ public class Gestion_binome {
                     String columnName = binomeTable.getColumnName(column);
                     Object updatedValue = model.getValueAt(row, column);
 
-
-
                     // Ensuite, mettez à jour la base de données en fonction de la colonne modifiée
                     if (columnName.equals("Note Rapport")) {
                         // Mettez à jour la note de rapport dans la base de données
@@ -282,7 +292,7 @@ public class Gestion_binome {
         });
 
 
-        // Gestionnaire d'événements pour le bouton "Générer en PDF"
+        // 添加"生成PDF"按钮的事件监听器
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -290,12 +300,82 @@ public class Gestion_binome {
             }
         });
 
+
+        // 使得列头更具可读性
+        JTableHeader header = binomeTable.getTableHeader();
+        header.setBackground(new Color(108, 190, 213)); // 设置列头背景颜色
+        header.setForeground(Color.WHITE); // 设置列头前景颜色
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));// 增加列头的行高
+
+
+        // 设置表格的字体和行高
+        binomeTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        binomeTable.setRowHeight(23);
+
+
+        // 创建一个表格渲染器以使表格更加美观
+        binomeTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                // 交替颜色
+                if (row % 2 == 0) {
+                    c.setBackground(new Color(240, 240, 240)); // 浅灰色
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                // 设置选中行的背景颜色
+                if (isSelected) {
+                    c.setBackground(new Color(173, 216, 230)); // 淡蓝色
+                }
+
+                // 设置文字居中
+                ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
+
+                return c;
+            }
+        });
+
     }
 
 
-    // Méthodes pour mettre à jour les colonnes de notes
+
+
+    // 建立数据库连接
+    private void establishDatabaseConnection() {
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
+
+    // 设置窗口图标
+    private void setIcons() {
+        ImageIcon customIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg");
+        frame.setIconImage(customIcon.getImage());
+    }
+
+
+    // 设置主窗口
+    private void setupMainFrame() {
+        frame = new JFrame("Gestion des Binômes du projet : " + getProjectName(projectNumber));
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(1000, 700));
+        // 添加这一行确保窗口的大小已经被正确设置
+        frame.pack();
+        // 将窗口设置为屏幕中央
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - frame.getWidth()) / 2;
+        int y = (screenSize.height - frame.getHeight()) / 2;
+        frame.setLocation(x, y);
+    }
+
+
+    // 更新评分列的方法
     private void updateNoteRapport(int binomeId, Object updatedValue) {
-        // Mettez à jour la note de rapport dans la base de données
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_rapport = ? WHERE id = ?";
@@ -308,8 +388,9 @@ public class Gestion_binome {
         }
     }
 
+
+    // 方法：更新学生1的答辩成绩
     private void updateNoteSoutenanceEtu1(int binomeId, Object updatedValue) {
-        // Mettez à jour la note de soutenance de l'étudiant 1 dans la base de données
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_soutenance_etu1 = ? WHERE id = ?";
@@ -322,8 +403,9 @@ public class Gestion_binome {
         }
     }
 
+
+    // 方法：更新学生2的答辩成绩
     private void updateNoteSoutenanceEtu2(int binomeId, Object updatedValue) {
-        // Mettez à jour la note de soutenance de l'étudiant 2 dans la base de données
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_soutenance_etu2 = ? WHERE id = ?";
@@ -337,6 +419,7 @@ public class Gestion_binome {
     }
 
 
+    // 方法：删除binome
     private void deleteBinome(int binomeId) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -351,6 +434,8 @@ public class Gestion_binome {
         }
     }
 
+
+    // 方法：根据ID获取行索引
     private int getRowIndexById(int binomeId) {
         for (int row = 0; row < tableModel.getRowCount(); row++) {
             int id = (int) tableModel.getValueAt(row, 0);
@@ -362,9 +447,9 @@ public class Gestion_binome {
     }
 
 
-
+    // 方法：从数据库加载binome信息
     private static void loadBinomesFromDatabase(int projectNumber) {
-        tableModel.setRowCount(0); // Efface les lignes existantes dans le tableau
+        tableModel.setRowCount(0); // 清空表中的现有行
         try {
             String sql = "SELECT * FROM Project_" + projectNumber;
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -394,7 +479,7 @@ public class Gestion_binome {
     }
 
 
-
+    // 方法：检查表是否存在
     private boolean checkTableExistence(int projectNumber) {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -406,6 +491,8 @@ public class Gestion_binome {
         }
     }
 
+
+    // 方法：创建Binome表
     private void createBinomeTable(int projectNumber) {
         try {
             Statement statement = connection.createStatement();
@@ -428,7 +515,7 @@ public class Gestion_binome {
     }
 
 
-
+    // 方法：获取项目名称
     private static String getProjectName(int projectId) {
         try {
             String query = "SELECT nom_matiere FROM Projets WHERE numero = ?";
@@ -445,6 +532,8 @@ public class Gestion_binome {
         return "";
     }
 
+
+    // 方法：获取学生姓名
     private static String getStudentName(int studentId) {
         try {
             String query = "SELECT nom, prenom FROM Etudiants WHERE numero = ?";
@@ -464,6 +553,7 @@ public class Gestion_binome {
     }
 
 
+    // 方法：过滤表格数据
     private void filterTable(String searchText, JTable binomeTable) {
         RowFilter<DefaultTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + searchText, 1,2, 3,4,5,6,7,8);
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) binomeTable.getRowSorter();
@@ -471,11 +561,13 @@ public class Gestion_binome {
     }
 
 
+    // 生成PDF文件
     private void generatePDF() {
+        // 打开文件选择器
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer le PDF");
 
-        // Définissez le filtre de fichier pour afficher uniquement les fichiers PDF
+        // 设置文件过滤器，仅显示PDF文件
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Fichiers PDF (*.pdf)", "pdf");
         fileChooser.setFileFilter(filter);
 
@@ -483,11 +575,11 @@ public class Gestion_binome {
 
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             try {
-                // Obtenez le fichier sélectionné par l'utilisateur
+                // 获取用户选择的文件
                 File fileToSave = fileChooser.getSelectedFile();
 
                 if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
-                    // Assurez-vous que l'extension est .pdf
+                    // 确保扩展名是.pdf
                     fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".pdf");
                 }
 
@@ -495,21 +587,21 @@ public class Gestion_binome {
                 PdfWriter.getInstance(document, new FileOutputStream(fileToSave));
                 document.open();
 
-                // Titre du document
+                // 文档标题
                 document.add(new Paragraph("Liste des étudiants"));
-                document.add(new Paragraph("\n")); // Ajout d'un paragraphe vide (saut de ligne)
+                document.add(new Paragraph("\n")); // 添加空段落（换行）
 
-                // Créez une table avec une colonne de moins que le modèle de table
-                PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount() - 1); // Moins une colonne (la colonne "ID" n'est pas incluse)
+                // 创建一个表格，列数比表格模型少一列
+                PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount() - 1); // 减去一列（不包括“ID”列）
                 pdfTable.setWidthPercentage(100);
 
-                // En-têtes de colonne (en excluant la colonne "ID")
+                // 列标题（不包括“ID”列）
                 for (int col = 1; col < tableModel.getColumnCount(); col++) {
                     PdfPCell cell = new PdfPCell(new Phrase(tableModel.getColumnName(col)));
                     pdfTable.addCell(cell);
                 }
 
-                // Contenu du tableau (en excluant la colonne "ID")
+                // 表格内容（不包括 "ID "列）
                 for (int row = 0; row < tableModel.getRowCount(); row++) {
                     for (int col = 1; col < tableModel.getColumnCount(); col++) {
                         PdfPCell cell = new PdfPCell(new Phrase(tableModel.getValueAt(row, col).toString()));
@@ -519,6 +611,7 @@ public class Gestion_binome {
 
                 document.add(pdfTable);
                 document.close();
+
 
                 JOptionPane.showMessageDialog(frame, "Le PDF a été généré avec succès et enregistré dans " + fileToSave.getAbsolutePath(), "PDF généré", JOptionPane.INFORMATION_MESSAGE);
             } catch (DocumentException | IOException e) {

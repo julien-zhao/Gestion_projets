@@ -3,22 +3,34 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.sql.*;
 
+// 学生添加对话框类
 public class StudentAddDialog extends JFrame {
+
     private Connection connection;
     private JFrame frame = new JFrame("Formulaire étudiant");
     private static DefaultTableModel tableModel;
 
-    public StudentAddDialog(Connection connection,JFrame frame, DefaultTableModel tableModel) {
+    // 构造函数
+    public StudentAddDialog(Connection connection, JFrame frame, DefaultTableModel tableModel) {
         this.connection = connection;
-        this.frame=frame;
+        this.frame = frame;
         this.tableModel = tableModel;
+
+        //外观渲染
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
         setTitle("Ajouter Étudiant");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(new Dimension(400, 200));
 
+        // 创建主面板以布局表单元素
         JPanel mainPanel = new JPanel(new GridLayout(6, 2));
 
         JTextField studentNameField = new JTextField(10);
@@ -27,6 +39,7 @@ public class StudentAddDialog extends JFrame {
         JComboBox<String> formationComboBox = new JComboBox<>(getFormationOptions());
         JComboBox<String> promotionComboBox = new JComboBox<>(getPromotionOptions());
 
+        // 添加表单元素到主面板
         mainPanel.add(new JLabel("Nom :"));
         mainPanel.add(studentNameField);
         mainPanel.add(new JLabel("Prénom :"));
@@ -38,32 +51,35 @@ public class StudentAddDialog extends JFrame {
 
         JButton validerButton = new JButton("Valider");
         JButton effacerButton = new JButton("Effacer");
+
         mainPanel.add(validerButton);
         mainPanel.add(effacerButton);
 
         add(mainPanel);
 
+        // 添加事件处理器到"Valider"按钮
         validerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Récupérer les données du formulaire
+                // 获取表单数据
                 String nom = studentNameField.getText();
                 String prenom = studentFirstNameField.getText();
                 String formation = (String) formationComboBox.getSelectedItem();
                 String promotion = (String) promotionComboBox.getSelectedItem();
-                int formationNumero = -1; // Par défaut, en cas de correspondance non trouvée
+                int formationNumero = -1; // 默认情况下，如果找不到匹配项
 
+                // 首字母大写
                 nom = capitalizeFirstLetter(nom);
                 prenom = capitalizeFirstLetter(prenom);
 
                 if (nom.isEmpty() || prenom.isEmpty()) {
-                    // Vérifier que les champs "Nom" et "Prénom" ne sont pas vides
+                    // 检查"Nom"和"Prénom"字段不为空
                     JOptionPane.showMessageDialog(frame, "Les champs 'Nom' et 'Prénom' ne peuvent pas être vides.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    // Les champs "Nom" et "Prénom" ne sont pas vides, continuez avec le traitement
+                    // "Nom"和"Prénom"字段不为空，继续处理
 
-                    // Utilisez une structure switch pour déterminer le numéro de formation en fonction de formation et promotion
-                    switch (formation.toLowerCase() + promotion.toLowerCase()) { // Convertir en minuscules pour ignorer la casse
+                    // 使用switch语句根据formation和promotion确定formation的编号
+                    switch (formation.toLowerCase() + promotion.toLowerCase()) {
                         case "idinitial":
                             formationNumero = 1;
                             break;
@@ -98,28 +114,26 @@ public class StudentAddDialog extends JFrame {
 
                     if (formationNumero != -1) {
                         try {
-                            // Créer une requête SQL d'insertion en utilisant le numéro de formation déterminé
+                            // 创建插入SQL查询，使用确定的formation编号
                             String sql = "INSERT INTO Etudiants (nom, prenom, formation_id) VALUES (?, ?, ?)";
-
                             PreparedStatement preparedStatement = connection.prepareStatement(sql);
                             preparedStatement.setString(1, nom);
                             preparedStatement.setString(2, prenom);
                             preparedStatement.setInt(3, formationNumero);
 
-                            // Exécutez la requête d'insertion
+                            // 执行插入查询
                             preparedStatement.executeUpdate();
 
-                            // Ajouter les données à la table
+                            // 添加数据到表格
                             tableModel.addRow(new Object[]{getLastInsertedStudentId(), nom, prenom, formation, promotion});
 
-                            // Effacer les champs du formulaire
+                            // 清空表单字段
                             studentNameField.setText("");
                             studentFirstNameField.setText("");
+                            formationComboBox.setSelectedIndex(0); // 重置formation选择
+                            promotionComboBox.setSelectedIndex(0); // 重置promotion选择
 
-                            formationComboBox.setSelectedIndex(0); // Réinitialisez la sélection de la formation
-                            promotionComboBox.setSelectedIndex(0); // Réinitialisez la sélection de la promotion
-
-                            // Afficher une fenêtre contextuelle de confirmation
+                            // 显示成功提示窗口
                             JOptionPane.showMessageDialog(frame, "Étudiant ajouté avec succès", "Confirmation", JOptionPane.INFORMATION_MESSAGE);
 
                         } catch (SQLException ex) {
@@ -130,27 +144,23 @@ public class StudentAddDialog extends JFrame {
             }
         });
 
-
+        // 添加事件处理器到"Effacer"按钮
         effacerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Effacez les champs du formulaire lorsque l'utilisateur clique sur "Effacer"
+                // 在用户点击"Effacer"时清空表单字段
                 studentNameField.setText("");
                 studentFirstNameField.setText("");
-                formationComboBox.setSelectedIndex(0); // Réinitialisez la sélection de la formation
-                promotionComboBox.setSelectedIndex(0); // Réinitialisez la sélection de la promotion
+                formationComboBox.setSelectedIndex(0); // 重置formation选择
+                promotionComboBox.setSelectedIndex(0); // 重置promotion选择
             }
         });
 
-        setLocationRelativeTo(null); // Centrer la fenêtre
+        setLocationRelativeTo(null); // 居中显示窗口
         setVisible(true);
     }
 
-    // Les méthodes getFormationOptions() et getPromotionOptions() peuvent être similaires à celles de Gestion_etudiant.
-    // Assurez-vous que ces méthodes ont accès à la connexion à la base de données.
-
-
-    // Méthode pour récupérer les options de formation depuis la base de données
+    // 获取Formation选项的方法
     private DefaultComboBoxModel<String> getFormationOptions() {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         try {
@@ -167,7 +177,7 @@ public class StudentAddDialog extends JFrame {
         return model;
     }
 
-    // Méthode pour récupérer les options de promotion depuis la base de données
+    // 获取Promotion选项的方法
     private DefaultComboBoxModel<String> getPromotionOptions() {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         try {
@@ -184,15 +194,15 @@ public class StudentAddDialog extends JFrame {
         return model;
     }
 
-    // Méthode pour mettre en majuscule la première lettre d'une chaîne
+    // 首字母大写的方法
     private String capitalizeFirstLetter(String input) {
         if (input == null || input.isEmpty()) {
-            return input; // Retourne la chaîne d'origine si elle est vide ou nulle
+            return input; // 如果为空或null，则返回原始字符串
         }
         return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
 
-    // Méthode pour obtenir le dernier numéro d'étudiant inséré
+    // 获取最后插入的学生编号的方法
     private int getLastInsertedStudentId() {
         int lastInsertedId = -1;
         try {
@@ -206,6 +216,4 @@ public class StudentAddDialog extends JFrame {
         }
         return lastInsertedId;
     }
-
-
 }
