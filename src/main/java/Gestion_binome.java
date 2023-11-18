@@ -14,8 +14,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -332,10 +331,62 @@ public class Gestion_binome {
                 // 设置文字居中
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
 
+                // 修改特定列的背景颜色
+                if (column == 4 || column == 5 || column == 6) {
+                    c.setBackground(new Color(255, 200, 200)); // 自定义颜色，可以根据需要修改
+                }
+
                 return c;
             }
         });
 
+        // 创建鼠标事件监听器
+        MouseListener mouseListener = new MouseAdapter() {
+            private JDialog dialog;
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // 当鼠标进入标签时，显示提示框
+                dialog = new JDialog((JFrame) null, "Aide", false);
+
+                ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+                dialog.setIconImage(icon.getImage());
+
+                int xOffset = 10;
+                int yOffset = 150;
+                Point componentPosition = e.getComponent().getLocationOnScreen();
+                int xPosition = componentPosition.x + xOffset;
+                int yPosition = componentPosition.y - dialog.getHeight() - yOffset;
+                dialog.setLocation(xPosition, yPosition);
+
+                JLabel label = new JLabel("<html>Les notes dans la zone rouge peuvent être modifiées directement en cliquant dessus. <br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
+                label.setPreferredSize(new Dimension(380, 100)); // 设置首选大小
+                label.setMaximumSize(new Dimension(500, 100)); // 设置最大大小以确保不会扩展
+                dialog.add(label);
+                dialog.pack();
+                dialog.setVisible(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // 当鼠标离开标签时，隐藏提示框
+                if (dialog != null) {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                }
+            }
+        };
+
+
+        //Aide功能实现
+        ImageIcon imageIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\wenhao.jpeg");
+        Image image = imageIcon.getImage(); // 转换为Image对象
+        Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
+        imageIcon = new ImageIcon(newImage); // 重新生成ImageIcon
+
+        JLabel reminderLabel = new JLabel(imageIcon);
+        reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
+        buttonPanel.add(reminderLabel, BorderLayout.EAST);
     }
 
 
