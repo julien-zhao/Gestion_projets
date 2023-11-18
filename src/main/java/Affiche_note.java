@@ -12,8 +12,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -131,6 +130,55 @@ public class Affiche_note {
 
         // 设置窗体图标
         setIcons();
+
+
+        // 创建鼠标事件监听器
+        MouseListener mouseListener = new MouseAdapter() {
+            private JDialog dialog;
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // 当鼠标进入标签时，显示提示框
+                dialog = new JDialog((JFrame) null, "Aide", false);
+
+                ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+                dialog.setIconImage(icon.getImage());
+
+                int xOffset = 10;
+                int yOffset = 150;
+                Point componentPosition = e.getComponent().getLocationOnScreen();
+                int xPosition = componentPosition.x + xOffset;
+                int yPosition = componentPosition.y - dialog.getHeight() - yOffset;
+                dialog.setLocation(xPosition, yPosition);
+
+                JLabel label = new JLabel("<html>- NoteFinale = (rapport + soutenance1) / 2 <br><br> - En cas de retard (Jours de retard > 0), la note finale est diminuée de la moitié du nombre de jours de retard (soit une diminution de 0,5 point par jour). <br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
+                label.setPreferredSize(new Dimension(380, 150)); // 设置首选大小
+                label.setMaximumSize(new Dimension(500, 150)); // 设置最大大小以确保不会扩展
+                dialog.add(label);
+                dialog.pack();
+                dialog.setVisible(true);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // 当鼠标离开标签时，隐藏提示框
+                if (dialog != null) {
+                    dialog.setVisible(false);
+                    dialog.dispose();
+                }
+            }
+        };
+
+
+        //Aide功能实现
+        ImageIcon imageIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\wenhao.jpeg");
+        Image image = imageIcon.getImage(); // 转换为Image对象
+        Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
+        imageIcon = new ImageIcon(newImage); // 重新生成ImageIcon
+
+        JLabel reminderLabel = new JLabel(imageIcon);
+        reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
+        buttonPanel.add(reminderLabel, BorderLayout.EAST);
     }
 
 
@@ -190,7 +238,6 @@ public class Affiche_note {
             noteTableModel.addRow(new Object[]{etudiant2,rapport, soutenance2, joursDeRetard, noteFinale2});
         }
     }
-
 
     // 获取项目名称的方法
     private String getProjectName(int projectNumber) {

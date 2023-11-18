@@ -175,14 +175,19 @@ public class Gestion_etudiant{
             public void mouseEntered(MouseEvent e) {
                 // 当鼠标进入标签时，显示提示框
                 dialog = new JDialog((JFrame) null, "Aide", false);
+
+                ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+                dialog.setIconImage(icon.getImage());
+
                 int xOffset = 10;
                 int yOffset = 150;
                 Point componentPosition = e.getComponent().getLocationOnScreen();
                 int xPosition = componentPosition.x + xOffset;
                 int yPosition = componentPosition.y - dialog.getHeight() - yOffset;
                 dialog.setLocation(xPosition, yPosition);
-                JLabel label = new JLabel("<html>Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.  \n Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
-                label.setPreferredSize(new Dimension(300, 100)); // 设置首选大小
+
+                JLabel label = new JLabel("<html> - Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.<br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
+                label.setPreferredSize(new Dimension(380, 100)); // 设置首选大小
                 label.setMaximumSize(new Dimension(500, 100)); // 设置最大大小以确保不会扩展
                 dialog.add(label);
                 dialog.pack();
@@ -240,7 +245,6 @@ public class Gestion_etudiant{
                 new StudentAddDialog(connection, frame, tableModel);
             }
         });
-//        setButtonAppearance(addStudentButton);
 
 
         // 为"删除学生"按钮添加事件监听器
@@ -273,7 +277,6 @@ public class Gestion_etudiant{
                 }
             }
         });
-//        setButtonAppearance(deleteStudentButton);
 
 
         // "生成 PDF "按钮的事件管理器
@@ -283,7 +286,6 @@ public class Gestion_etudiant{
                 generatePDF();
             }
         });
-//        setButtonAppearance(generatePDFButton);
     }
 
 
@@ -527,16 +529,6 @@ public class Gestion_etudiant{
     }
 
 
-//    private void setButtonAppearance(AbstractButton button) {
-//        // 外观渲染
-//        try {
-//            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-//            SwingUtilities.updateComponentTreeUI(frame);
-//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-
 
     private JPanel configureNorthPanel() {
         JPanel northPanel = new JPanel();
@@ -586,7 +578,6 @@ public class Gestion_etudiant{
                 new Menu();
             }
         });
-//        setButtonAppearance(retourMenuButton);
     }
 
 }

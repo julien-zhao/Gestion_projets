@@ -57,6 +57,10 @@ public class StudentAddDialog extends JFrame {
 
         add(mainPanel);
 
+        ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+        setIconImage(icon.getImage()); // 设置 JFrame 的图标
+
+
         // 添加事件处理器到"Valider"按钮
         validerButton.addActionListener(new ActionListener() {
             @Override

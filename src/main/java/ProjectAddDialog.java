@@ -24,6 +24,9 @@ public class ProjectAddDialog {
         frame = new JFrame("Ajouter un Projet");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+        ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+        frame.setIconImage(icon.getImage()); // 设置 JFrame 的图标
+
         JPanel mainPanel = new JPanel(new GridLayout(6, 2));
 
         matiereField = new JTextField(10);
