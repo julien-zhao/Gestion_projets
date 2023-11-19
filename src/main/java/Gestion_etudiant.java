@@ -20,7 +20,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.*;
 import java.text.Collator;
+import java.util.Collections;
 import java.util.Comparator;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.RowFilter;
+import javax.swing.table.TableRowSorter;
+import javax.swing.table.*;
 
 
 
@@ -42,35 +52,23 @@ public class Gestion_etudiant{
 
     Gestion_etudiant(){
 
-        // 建立数据库连接
         establishDatabaseConnection();
 
-        // 设置主窗口属性
         setupMainFrame();
 
-        // 设置窗体图标
         setIcons();
-
-        // 创建并配置学生表格
         createAndConfigureStudentTable();
-
-        // 创建并配置按钮
         configureButtons();
 
-        // 创建并配置搜索字段
         configureSearchField();
 
-        // 创建并配置北部面板
         JPanel northPanel = configureNorthPanel();
 
-        // 创建并配置南部面板
         JPanel southPanel = configureSouthPanel();
 
-        // 为返回菜单按钮添加动作监听器
         addReturnMenuListener();
 
 
-        // 创建并配置表格滚动面板，同时设置边框和柔和的边框
         JTable studentTable = createAndConfigureStudentTable();
         JScrollPane tableScrollPane = new JScrollPane(studentTable);
         tableScrollPane.setBorder(BorderFactory.createCompoundBorder(
@@ -86,22 +84,19 @@ public class Gestion_etudiant{
         searchPanel.add(searchField);
 
 
-        // 设置表格列的最大宽度、最小宽度、首选宽度和不可调整大小
         TableColumnModel tableColumnModel = studentTable.getColumnModel();
         tableColumnModel.getColumn(0).setMaxWidth(0);
         tableColumnModel.getColumn(0).setMinWidth(0);
         tableColumnModel.getColumn(0).setPreferredWidth(0);
         tableColumnModel.getColumn(0).setResizable(false);
 
-
-        //页面的NORTH部分
         northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
         northPanel.add(logoDauphine);
         northPanel.add(searchPanel);
         northPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
 
-        //页面的SOUTH部分
+
         southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(addStudentButton);
         southPanel.add(deleteStudentButton);
@@ -109,19 +104,16 @@ public class Gestion_etudiant{
         southPanel.add(retourMenuButton);
         southPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // 调整边缘的距离
 
-        //页面的MAIN部分
         mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
 
 
-        frame.add(mainPanel); // 将主面板添加到窗体，并设置窗体属性
-        frame.pack(); // 自动调整窗体大小以适应内容
-        frame.setVisible(true); // 设置窗体可见
-        loadStudentsFromDatabase(); // 从数据库加载学生数据
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setVisible(true);
+        loadStudentsFromDatabase();
 
-
-        // 创建并配置formation下拉列表筛选器
         JComboBox<String> formationFilter = new JComboBox<>();
         formationFilter.addItem("All");
         formationFilter.addItem("ID");
@@ -133,18 +125,14 @@ public class Gestion_etudiant{
             public void actionPerformed(ActionEvent e) {
                 String selectedFormation = (String) formationFilter.getSelectedItem();
                 if (selectedFormation.equals("All")) {
-                    // 如果选择了 "All"，则传入空字符串
                     selectedFormation = "";
                 }
-                // 直接获取已经创建的表格对象，并在该表格上应用过滤器
                 JTable studentTable = (JTable) ((JScrollPane) mainPanel.getComponent(1)).getViewport().getView();
                 filterTable(selectedFormation, studentTable);
             }
         });
         northPanel.add(formationFilter);
 
-
-        // 创建并配置promotion下拉列表筛选器
         JComboBox<String> promotionFilter = new JComboBox<>();
         promotionFilter.addItem("All");
         promotionFilter.addItem("Initial");
@@ -156,10 +144,8 @@ public class Gestion_etudiant{
             public void actionPerformed(ActionEvent e) {
                 String selectedPromotion = (String) promotionFilter.getSelectedItem();
                 if (selectedPromotion.equals("All")) {
-                    // 如果选择了 "All"，则传入空字符串
                     selectedPromotion = "";
                 }
-                // 直接获取已经创建的表格对象，并在该表格上应用过滤器
                 JTable studentTable = (JTable) ((JScrollPane) mainPanel.getComponent(1)).getViewport().getView();
                 filterTable(selectedPromotion, studentTable);
             }
@@ -167,28 +153,21 @@ public class Gestion_etudiant{
         northPanel.add(promotionFilter);
 
 
-        // 创建鼠标事件监听器
         MouseListener mouseListener = new MouseAdapter() {
             private JDialog dialog;
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                // 当鼠标进入标签时，显示提示框
                 dialog = new JDialog((JFrame) null, "Aide", false);
-
-                ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
-                dialog.setIconImage(icon.getImage());
-
                 int xOffset = 10;
                 int yOffset = 150;
                 Point componentPosition = e.getComponent().getLocationOnScreen();
                 int xPosition = componentPosition.x + xOffset;
                 int yPosition = componentPosition.y - dialog.getHeight() - yOffset;
                 dialog.setLocation(xPosition, yPosition);
-
-                JLabel label = new JLabel("<html> - Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.<br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
-                label.setPreferredSize(new Dimension(380, 100)); // 设置首选大小
-                label.setMaximumSize(new Dimension(500, 100)); // 设置最大大小以确保不会扩展
+                JLabel label = new JLabel("<html>Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.  \n Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
+                label.setPreferredSize(new Dimension(300, 100));
+                label.setMaximumSize(new Dimension(500, 100));
                 dialog.add(label);
                 dialog.pack();
                 dialog.setVisible(true);
@@ -196,7 +175,6 @@ public class Gestion_etudiant{
 
             @Override
             public void mouseExited(MouseEvent e) {
-                // 当鼠标离开标签时，隐藏提示框
                 if (dialog != null) {
                     dialog.setVisible(false);
                     dialog.dispose();
@@ -205,81 +183,75 @@ public class Gestion_etudiant{
         };
 
 
-        //Aide功能实现
-        ImageIcon imageIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\wenhao.jpeg");
+        ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage(); // 转换为Image对象
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
         imageIcon = new ImageIcon(newImage); // 重新生成ImageIcon
 
         JLabel reminderLabel = new JLabel(imageIcon);
-        reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
+        reminderLabel.addMouseListener(mouseListener);
         southPanel.add(reminderLabel, BorderLayout.EAST);
 
-
-        // 设置搜索字段的文档监听器，用于实时过滤表格数据
+        // recherche rapide
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                // 当插入文本时触发，调用filterTable方法过滤表格数据
                 filterTable(searchField.getText(), studentTable);
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                // 当删除文本时触发，同样调用filterTable方法过滤表格数据
                 filterTable(searchField.getText(), studentTable);
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                // 属性更改事件，不在此处理
             }
         });
 
 
-        // 为"添加学生"按钮添加事件监听器
         addStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 当用户点击"添加学生"按钮时，打开一个学生添加对话框
                 new StudentAddDialog(connection, frame, tableModel);
             }
         });
 
 
-        // 为"删除学生"按钮添加事件监听器
         deleteStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 获取选中行的学生数据，并进行删除确认
                 int selectedRow = studentTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    int studentIdToDelete = (int) tableModel.getValueAt(selectedRow, 0);
-
-                    // 弹出确认对话框
-                    int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer cet étudiant ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+                    int modelRow = studentTable.convertRowIndexToModel(selectedRow);
+                    int studentIdToDelete = (int) tableModel.getValueAt(modelRow, 0);
+                    int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer cet étudiant ? Attention : s'il fait partie d'un binôme, il ne pourra pas être supprimé.", "Confirmation", JOptionPane.YES_NO_OPTION);
 
                     if (choice == JOptionPane.YES_OPTION) {
                         try {
-                            // 执行数据库删除操作，并从表格模型中移除相应行
                             String deleteSql = "DELETE FROM Etudiants WHERE numero = ?";
                             PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
                             preparedStatement.setInt(1, studentIdToDelete);
                             preparedStatement.executeUpdate();
-                            tableModel.removeRow(selectedRow);
+                            tableModel.removeRow(modelRow);
+
+                            // Affichez une boîte de dialogue d'avertissement indiquant que la suppression a réussi
+                            JOptionPane.showMessageDialog(frame, "Étudiant supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+
                         } catch (SQLException ex) {
                             ex.printStackTrace();
+                            // Affichez une boîte de dialogue d'erreur en cas d'échec de la suppression
+                            JOptionPane.showMessageDialog(frame, "L'étudiant fait partie d'un binôme et ne peut pas être supprimé.", "Erreur", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
-                    // 如果没有选中行，则提示用户选择一个学生
                     JOptionPane.showMessageDialog(frame, "Veuillez sélectionner un étudiant à supprimer.", "Avertissement", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
 
 
-        // "生成 PDF "按钮的事件管理器
+
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -306,14 +278,8 @@ public class Gestion_etudiant{
                 String nom = resultSet.getString("nom");
                 String prenom = resultSet.getString("prenom");
                 int formationId = resultSet.getInt("formation_id");
-
-                // Maintenant, vous devrez récupérer le nom de la formation en fonction de l'ID de la formation
-                String formation = getFormation(formationId); // Utilisez une méthode séparée
-
-                // Vous devez également récupérer la promotion en fonction de l'ID de la formation, si elle existe dans une table distincte.
-                String promotion = getPromotion(formationId); // Utilisez une autre méthode pour récupérer la promotion
-
-                // Ajoutez l'étudiant au tableau
+                String formation = getFormation(formationId);
+                String promotion = getPromotion(formationId);
                 tableModel.addRow(new Object[]{id, nom, prenom, formation, promotion});
             }
 
@@ -364,21 +330,15 @@ public class Gestion_etudiant{
     }
 
 
-
-    // 根据搜索文本过滤表格的函数
     private void filterTable(String searchText,JTable studentTable) {
         RowFilter<DefaultTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + searchText, 1, 2, 3, 4);
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) studentTable.getRowSorter();
         sorter.setRowFilter(rowFilter);
     }
 
-
-
-    // 生成PDF文件的函数
     private void generatePDF() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer le PDF");
-        // 设置文件过滤器，仅显示PDF文件
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Fichiers PDF (*.pdf)", "pdf");
         fileChooser.setFileFilter(filter);
 
@@ -390,7 +350,6 @@ public class Gestion_etudiant{
                 File fileToSave = fileChooser.getSelectedFile();
 
                 if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
-                    // Assurez-vous que l'extension est .pdf
                     fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".pdf");
                 }
 
@@ -400,19 +359,16 @@ public class Gestion_etudiant{
 
                 // Titre du document
                 document.add(new Paragraph("Liste des étudiants"));
-                document.add(new Paragraph("\n")); // Ajout d'un paragraphe vide (saut de ligne)
+                document.add(new Paragraph("\n"));
 
-                // Créez une table avec une colonne de moins que le modèle de table
-                PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount() - 1); // Moins une colonne (la colonne "ID" n'est pas incluse)
+                PdfPTable pdfTable = new PdfPTable(tableModel.getColumnCount() - 1);
                 pdfTable.setWidthPercentage(100);
 
-                // En-têtes de colonne (en excluant la colonne "ID")
                 for (int col = 1; col < tableModel.getColumnCount(); col++) {
                     PdfPCell cell = new PdfPCell(new Phrase(tableModel.getColumnName(col)));
                     pdfTable.addCell(cell);
                 }
 
-                // Contenu du tableau (en excluant la colonne "ID")
                 for (int row = 0; row < tableModel.getRowCount(); row++) {
                     for (int col = 1; col < tableModel.getColumnCount(); col++) {
                         PdfPCell cell = new PdfPCell(new Phrase(tableModel.getValueAt(row, col).toString()));
@@ -434,24 +390,18 @@ public class Gestion_etudiant{
 
 
     private JTable createAndConfigureStudentTable() {
-        // 创建表格用于显示学生列表
         String[] columnNames = {"ID", "Nom", "Prénom", "Formation", "Promotion"};
         tableModel = new DefaultTableModel(columnNames, 0); // Utilisation du modèle de données
 
-        // 创建主表格
         JTable studentTable = new JTable(tableModel);
 
-        // 隐藏表格的网格线
         studentTable.setShowGrid(false);
 
-        // 设置表格为透明
         studentTable.setOpaque(false);
 
-        // 启用表格排序
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         studentTable.setRowSorter(sorter);
 
-        // 以不区分大小写的方式对列进行排序
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
@@ -463,30 +413,25 @@ public class Gestion_etudiant{
         };
         studentTable.setRowSorter(caseInsensitiveSorter);
 
-        // 使得列头更具可读性
         JTableHeader header = studentTable.getTableHeader();
-        header.setBackground(new Color(108, 190, 213)); // 设置列头背景颜色
+        header.setBackground(new Color(108, 190, 213));
         header.setForeground(Color.WHITE); // 设置列头前景颜色
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));// 增加列头的行高
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));
 
-        // 设置表格的字体和行高
         studentTable.setFont(new Font("Arial", Font.PLAIN, 12));
         studentTable.setRowHeight(23);
 
-        // 创建一个表格渲染器以使表格更加美观
         studentTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                // 交替颜色
                 if (row % 2 == 0) {
-                    c.setBackground(new Color(240, 240, 240)); // 浅灰色
+                    c.setBackground(new Color(240, 240, 240));
                 } else {
                     c.setBackground(Color.WHITE);
                 }
-                // 设置选中行的背景颜色
                 if (isSelected) {
-                    c.setBackground(new Color(173, 216, 230)); // 淡蓝色
+                    c.setBackground(new Color(173, 216, 230));
                 }
                 return c;
             }
@@ -513,9 +458,7 @@ public class Gestion_etudiant{
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000, 700));
-        // 添加这一行确保窗口的大小已经被正确设置
         frame.pack();
-        // 将窗口设置为屏幕中央
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - frame.getWidth()) / 2;
         int y = (screenSize.height - frame.getHeight()) / 2;
@@ -524,16 +467,25 @@ public class Gestion_etudiant{
 
 
     private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
+
+//    private void setButtonAppearance(AbstractButton button) {
+//        // 外观渲染
+//        try {
+//            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+//            SwingUtilities.updateComponentTreeUI(frame);
+//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 
 
     private JPanel configureNorthPanel() {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
-        // 其他北部面板的配置...
         return northPanel;
     }
 
@@ -545,7 +497,6 @@ public class Gestion_etudiant{
         southPanel.add(deleteStudentButton);
         southPanel.add(generatePDFButton);
         southPanel.add(retourMenuButton);
-        // 其他南部面板的配置...
         return southPanel;
     }
 
@@ -560,12 +511,10 @@ public class Gestion_etudiant{
 
 
     private void configureButtons() {
-        // 创建并配置按钮
         addStudentButton = new JButton("Ajouter Étudiant");
         deleteStudentButton = new JButton("Supprimer Étudiant");
         generatePDFButton = new JButton("Générer en PDF");
         retourMenuButton = new JButton("Retour au Menu");
-        // 其他按钮的配置...
     }
 
 

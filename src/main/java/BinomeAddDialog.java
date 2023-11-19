@@ -4,6 +4,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,15 +12,17 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-// 添加Binome对话框类
+
 public class BinomeAddDialog extends JFrame {
     private Connection connection;
     private JFrame parentFrame;
     private DefaultTableModel tableModel;
     private int projectNumber = -1;
+    private Set<String> studentsInBinome = new HashSet<>();
 
-    // 构造函数
     public BinomeAddDialog(Connection connection, JFrame parentFrame, DefaultTableModel tableModel, int projectNumber) {
         this.connection = connection;
         this.parentFrame = parentFrame;
@@ -32,6 +35,7 @@ public class BinomeAddDialog extends JFrame {
 
         JPanel mainPanel = new JPanel(new GridLayout(8, 2));
 
+        initializeStudentsInBinome();
         JComboBox<String> student1ComboBox = new JComboBox<>(getStudentOptions());
         JComboBox<String> student2ComboBox = new JComboBox<>(getStudentOptions());
 
@@ -41,8 +45,8 @@ public class BinomeAddDialog extends JFrame {
 
         MaskFormatter dateMask = null;
         try {
-            dateMask = new MaskFormatter("####-##-##"); // 日期格式的掩码 (YYYY-MM-DD)
-            dateMask.setPlaceholderCharacter('_'); // 替换破折号的字符
+            dateMask = new MaskFormatter("####-##-##"); // (YYYY-MM-DD)
+            dateMask.setPlaceholderCharacter('_');
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -69,10 +73,10 @@ public class BinomeAddDialog extends JFrame {
 
         add(mainPanel);
 
-        ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
-        setIconImage(icon.getImage()); // 设置 JFrame 的图标
+        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        setIconImage(icon.getImage());
 
-        // 添加事件处理器到"Valider"按钮
+        //button pour valider
         validerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,7 +92,6 @@ public class BinomeAddDialog extends JFrame {
                     int student1Id = getStudentId(selectedStudent1);
                     int student2Id = getStudentId(selectedStudent2);
 
-                    // 使用变量构建表名
                     String tableName = "Project_" + projectId;
 
                     try {
@@ -106,29 +109,8 @@ public class BinomeAddDialog extends JFrame {
 
                         int binomeId = getLastInsertedBinomeId();
 
-                        // 在第一个学生的表中插入一条记录
-                        String insertNoteSql1 = "INSERT INTO Notes (etudiant_id, projet_id, note_rapport, note_soutenance, note_finale) VALUES (?, ?, ?, ?, ?)";
-                        PreparedStatement preparedStatementNote1 = connection.prepareStatement(insertNoteSql1);
-                        preparedStatementNote1.setInt(1, student1Id);
-                        preparedStatementNote1.setInt(2, projectId);
-                        preparedStatementNote1.setString(3, rapport);
-                        preparedStatementNote1.setString(4, soutenance1);
-                        preparedStatementNote1.setString(5, "0");
-                        preparedStatementNote1.executeUpdate();
-
-                        // 在第二个学生的表中插入一条记录
-                        String insertNoteSql2 = "INSERT INTO Notes (etudiant_id, projet_id, note_rapport, note_soutenance, note_finale) VALUES (?, ?, ?, ?, ?)";
-                        PreparedStatement preparedStatementNote2 = connection.prepareStatement(insertNoteSql2);
-                        preparedStatementNote2.setInt(1, student2Id);
-                        preparedStatementNote2.setInt(2, projectId);
-                        preparedStatementNote2.setString(3, rapport);
-                        preparedStatementNote2.setString(4, soutenance2);
-                        preparedStatementNote2.setString(5, "0");
-                        preparedStatementNote2.executeUpdate();
-
                         tableModel.addRow(new Object[]{binomeId, projectNumber, selectedStudent1, selectedStudent2, rapport, soutenance1, soutenance2, dateRemiseEffective});
 
-                        // 清空表单字段
                         student1ComboBox.setSelectedIndex(0);
                         student2ComboBox.setSelectedIndex(0);
                         rapportField.setText("");
@@ -136,7 +118,6 @@ public class BinomeAddDialog extends JFrame {
                         soutenance2Field.setText("");
                         dateRemiseEffectiveField.setText("");
 
-                        // 显示确认窗口
                         JOptionPane.showMessageDialog(parentFrame, "Binôme ajouté avec succès!", "Confirmation", JOptionPane.INFORMATION_MESSAGE);
                     } catch (SQLException ex) {
                         ex.printStackTrace();
@@ -147,7 +128,7 @@ public class BinomeAddDialog extends JFrame {
             }
         });
 
-        // 添加事件处理器到"Effacer"按钮
+        //button pour effacer le contenu
         effacerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -159,18 +140,21 @@ public class BinomeAddDialog extends JFrame {
                 dateRemiseEffectiveField.setText("");
             }
         });
-
         setLocationRelativeTo(parentFrame);
         setVisible(true);
     }
 
-    // 获取学生ID的方法
     private int getStudentId(String studentName) {
         int studentId = -1;
         try {
-            String query = "SELECT numero FROM Etudiants WHERE nom = ?";
+            String[] names = studentName.split(" ");
+            String firstName = names[0];
+            String lastName = names[1];
+
+            String query = "SELECT numero FROM Etudiants WHERE nom = ? AND prenom = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, studentName);
+            preparedStatement.setString(1, lastName);
+            preparedStatement.setString(2, firstName);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 studentId = resultSet.getInt("numero");
@@ -181,7 +165,6 @@ public class BinomeAddDialog extends JFrame {
         return studentId;
     }
 
-    // 验证日期格式的方法
     private boolean isValidDateFormat(String date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setLenient(false);
@@ -194,7 +177,6 @@ public class BinomeAddDialog extends JFrame {
         }
     }
 
-    // 获取最后插入的Binome ID的方法
     private int getLastInsertedBinomeId() {
         int binomeId = -1;
         try {
@@ -210,16 +192,24 @@ public class BinomeAddDialog extends JFrame {
         return binomeId;
     }
 
-    // 获取学生选项的方法
+
+// on obtient la liste des étudiants
     private DefaultComboBoxModel<String> getStudentOptions() {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         try {
-            String query = "SELECT nom FROM Etudiants";
+            String query = "SELECT nom, prenom, numero FROM Etudiants";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                String studentName = resultSet.getString("nom");
-                model.addElement(studentName);
+                String studentLastName = resultSet.getString("nom");
+                String studentFirstName = resultSet.getString("prenom");
+                int studentId = resultSet.getInt("numero");
+                String fullName = studentFirstName + " " + studentLastName;
+
+                // Exclude students already in a binome
+                if (!studentsInBinome.contains(String.valueOf(studentId))) {
+                    model.addElement(fullName);
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -227,7 +217,9 @@ public class BinomeAddDialog extends JFrame {
         return model;
     }
 
-    // 验证成绩的方法
+
+
+    // si la note est entre 0 et 20
     private boolean isValidGrade(String grade) {
         try {
             double value = Double.parseDouble(grade);
@@ -236,4 +228,23 @@ public class BinomeAddDialog extends JFrame {
             return false;
         }
     }
+
+    private void initializeStudentsInBinome() {
+        try {
+            String name = "project_" + projectNumber;
+            String query = "SELECT DISTINCT etudiant1_numero, etudiant2_numero FROM " + name;
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                int student1 = resultSet.getInt("etudiant1_numero");
+                int student2 = resultSet.getInt("etudiant2_numero");
+                studentsInBinome.add(String.valueOf(student1));
+                studentsInBinome.add(String.valueOf(student2));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 }

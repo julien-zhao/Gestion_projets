@@ -7,7 +7,7 @@ import java.sql.*;
 import javax.swing.text.MaskFormatter;
 import java.text.ParseException;
 
-// 添加项目对话框类
+
 public class ProjectAddDialog {
     private JFrame frame;
     private JTextField matiereField;
@@ -16,7 +16,6 @@ public class ProjectAddDialog {
     private DefaultTableModel tableModel;
     private Connection connection;
 
-    // 构造函数
     public ProjectAddDialog(DefaultTableModel tableModel, Connection connection) {
         this.tableModel = tableModel;
         this.connection = connection;
@@ -24,8 +23,8 @@ public class ProjectAddDialog {
         frame = new JFrame("Ajouter un Projet");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
-        frame.setIconImage(icon.getImage()); // 设置 JFrame 的图标
+        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        frame.setIconImage(icon.getImage());
 
         JPanel mainPanel = new JPanel(new GridLayout(6, 2));
 
@@ -51,7 +50,6 @@ public class ProjectAddDialog {
         JButton addButton = new JButton("Ajouter");
         JButton clearButton = new JButton("Effacer");
 
-        // 添加事件处理器到"Ajouter"按钮
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -69,7 +67,6 @@ public class ProjectAddDialog {
             }
         });
 
-        // 添加事件处理器到"Effacer"按钮
         clearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,7 +83,6 @@ public class ProjectAddDialog {
         frame.setVisible(true);
     }
 
-    // 添加项目的方法
     private void addProject() throws SQLException {
         String matiere = matiereField.getText();
         String sujet = sujetField.getText();
@@ -107,7 +103,6 @@ public class ProjectAddDialog {
         }
     }
 
-    // 验证日期格式的方法
     private boolean isValidDateFormat(String date) {
         String regex = "\\d{4}-\\d{2}-\\d{2}";
         if (date.matches(regex)) {
@@ -116,9 +111,7 @@ public class ProjectAddDialog {
             int month = Integer.parseInt(dateParts[1]);
             int day = Integer.parseInt(dateParts[2]);
 
-            // 验证有效月份 (1-12)
             if (month >= 1 && month <= 12) {
-                // 验证每月的有效天数
                 int[] daysInMonth = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
                 if (month == 2 && isLeapYear(year)) {
                     return day >= 1 && day <= 29;
@@ -130,24 +123,19 @@ public class ProjectAddDialog {
         return false;
     }
 
-    // 判断是否是闰年的方法
     private boolean isLeapYear(int year) {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
-
-    // 验证字段的方法
     private boolean validateFields() {
         return !matiereField.getText().isEmpty() && !sujetField.getText().isEmpty() && !dateRemiseField.getText().isEmpty();
     }
 
-    // 清空字段的方法
     private void clearFields() {
         matiereField.setText("");
         sujetField.setText("");
         dateRemiseField.setValue(null);
     }
 
-    // 获取最后插入的项目编号的方法
     private int getLastInsertedProjectId() {
         int lastInsertedId = -1;
         try {

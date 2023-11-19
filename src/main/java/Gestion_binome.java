@@ -28,39 +28,27 @@ public class Gestion_binome {
     JFrame frame;
     int projectNumber;
 
-
-
-
     public Gestion_binome(int projectNumber) {
 
-        // 初始化projectNumber
         this.projectNumber = projectNumber;
 
-        // 建立数据库连接
         establishDatabaseConnection();
 
-        // 设置主窗口属性
         setupMainFrame();
 
-        // 设置窗体图标
         setIcons();
 
-        // 创建主面板
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // 创建binome列表的表格
         String[] columnNames = {"ID", "Projet", "Étudiant 1", "Étudiant 2", "Note Rapport", "Note Soutenance Étudiant 1", "Note Soutenance Étudiant 2", "Date de Remise Effective"};
         tableModel = new DefaultTableModel(columnNames, 0);
 
-        // 创建表格并启用排序
         JTable binomeTable = new JTable(tableModel);
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         binomeTable.setRowSorter(sorter);
 
-        // 隐藏表格的网格线
         binomeTable.setShowGrid(false);
 
-        // 为表格启用不区分大小写的排序
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
@@ -95,7 +83,7 @@ public class Gestion_binome {
         tableColumnModel.getColumn(1).setPreferredWidth(0);
         tableColumnModel.getColumn(1).setResizable(false);
 
-        // 添加搜索字段的文本变更监听器
+        // recherche rapide
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -109,16 +97,14 @@ public class Gestion_binome {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                // 不处理属性更改
             }
         });
 
 
-        // 添加返回项目按钮的事件监听器
+        // button retour
         retourProjectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 关闭配对管理界面，返回 Gestion_projet 的现有实例
                 frame.dispose(); // Ferme l'interface de gestion des binômes
                 if (Gestion_projet.currentInstance != null) {
                     Gestion_projet.currentInstance.frame.setVisible(true); // Affichez à nouveau l'instance existante de Gestion_projet
@@ -126,8 +112,6 @@ public class Gestion_binome {
             }
         });
 
-
-        // 创建按钮面板
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(addBinomeButton);
         buttonPanel.add(deleteBinomeButton);
@@ -136,47 +120,43 @@ public class Gestion_binome {
         buttonPanel.add(retourProjectButton);
 
 
-        // 创建搜索面板
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Recherche : "));
         searchPanel.add(searchField);
 
 
-        // 将组件添加到主面板
         mainPanel.add(searchPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
 
-        // 将主面板添加到窗口
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
 
-        // 检查binome是否存在
         boolean binomeTableExists = checkTableExistence(projectNumber);
 
         if (!binomeTableExists) {
-            // 如果不存在，则创建binome表
             createBinomeTable(projectNumber);
         }
-        // 从数据库加载binome信息
         loadBinomesFromDatabase(projectNumber);
-        // 添加"添加binome"按钮的事件监听器
+
         addBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new BinomeAddDialog(connection, frame, tableModel,projectNumber);
             }
         });
-        // 添加"删除binome"按钮的事件监听器
+
+        //button supprimer
         deleteBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = binomeTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    int binomeIdToDelete = (int) tableModel.getValueAt(selectedRow, 0);
 
+                if (selectedRow != -1) {
+                    int modelRow = binomeTable.convertRowIndexToModel(selectedRow);
+                    int binomeIdToDelete = (int) tableModel.getValueAt(modelRow, 0);
                     int confirmation = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer ce binôme ?", "Confirmation de suppression", JOptionPane.YES_NO_OPTION);
                     if (confirmation == JOptionPane.YES_OPTION) {
                         deleteBinome(binomeIdToDelete);
@@ -186,7 +166,7 @@ public class Gestion_binome {
                 }
             }
         });
-        // 添加"显示成绩"按钮的事件监听器
+        // button aficher les notes
         afficheNoteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -195,19 +175,16 @@ public class Gestion_binome {
             }
         });
 
-
-        // 为成绩列添加自定义单元格编辑事件处理器
         binomeTable.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(new JTextField()) {
             @Override
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false;// 防止编辑结束
+                    return false;
                 }
             }
         });
@@ -216,12 +193,11 @@ public class Gestion_binome {
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // 防止编辑结束
+                    return false;
                 }
             }
         });
@@ -230,18 +206,15 @@ public class Gestion_binome {
             public boolean stopCellEditing() {
                 try {
                     String value = (String) getCellEditorValue();
-                    // 检查值是否为有效数字，使用 Double.parseDouble
                     Double.parseDouble(value);
                     return super.stopCellEditing();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // 防止编辑结束
+                    return false;
                 }
             }
         });
 
-
-        // Ajoutez des gestionnaires d'événements de modification de cellule personnalisés pour les colonnes de notes
         DefaultCellEditor numberCellEditor = new DefaultCellEditor(new JTextField()) {
             @Override
             public boolean stopCellEditing() {
@@ -252,11 +225,11 @@ public class Gestion_binome {
                         return super.stopCellEditing();
                     } else {
                         JOptionPane.showMessageDialog(frame, "La note doit être entre 0 et 20.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                        return false; // Empêche la fin de l'édition
+                        return false;
                     }
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(frame, "Veuillez saisir un nombre valide.", "Erreur de saisie", JOptionPane.ERROR_MESSAGE);
-                    return false; // Empêche la fin de l'édition
+                    return false;
                 }
             }
         };
@@ -275,15 +248,11 @@ public class Gestion_binome {
                     String columnName = binomeTable.getColumnName(column);
                     Object updatedValue = model.getValueAt(row, column);
 
-                    // Ensuite, mettez à jour la base de données en fonction de la colonne modifiée
                     if (columnName.equals("Note Rapport")) {
-                        // Mettez à jour la note de rapport dans la base de données
                         updateNoteRapport(binomeId, updatedValue);
                     } else if (columnName.equals("Note Soutenance Étudiant 1")) {
-                        // Mettez à jour la note de soutenance de l'étudiant 1 dans la base de données
                         updateNoteSoutenanceEtu1(binomeId, updatedValue);
                     } else if (columnName.equals("Note Soutenance Étudiant 2")) {
-                        // Mettez à jour la note de soutenance de l'étudiant 2 dans la base de données
                         updateNoteSoutenanceEtu2(binomeId, updatedValue);
                     }
                 }
@@ -291,7 +260,7 @@ public class Gestion_binome {
         });
 
 
-        // 添加"生成PDF"按钮的事件监听器
+        // generer un pdf
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -299,57 +268,46 @@ public class Gestion_binome {
             }
         });
 
-
-        // 使得列头更具可读性
         JTableHeader header = binomeTable.getTableHeader();
-        header.setBackground(new Color(108, 190, 213)); // 设置列头背景颜色
+        header.setBackground(new Color(108, 190, 213));
         header.setForeground(Color.WHITE); // 设置列头前景颜色
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));// 增加列头的行高
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));
 
 
-        // 设置表格的字体和行高
         binomeTable.setFont(new Font("Arial", Font.PLAIN, 12));
         binomeTable.setRowHeight(23);
 
 
-        // 创建一个表格渲染器以使表格更加美观
         binomeTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                // 交替颜色
+
                 if (row % 2 == 0) {
-                    c.setBackground(new Color(240, 240, 240)); // 浅灰色
+                    c.setBackground(new Color(240, 240, 240));
                 } else {
                     c.setBackground(Color.WHITE);
                 }
-                // 设置选中行的背景颜色
                 if (isSelected) {
-                    c.setBackground(new Color(173, 216, 230)); // 淡蓝色
+                    c.setBackground(new Color(173, 216, 230));
                 }
-
-                // 设置文字居中
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
 
-                // 修改特定列的背景颜色
                 if (column == 4 || column == 5 || column == 6) {
-                    c.setBackground(new Color(255, 200, 200)); // 自定义颜色，可以根据需要修改
+                    c.setBackground(new Color(255, 200, 200));
                 }
 
                 return c;
             }
         });
-
-        // 创建鼠标事件监听器
         MouseListener mouseListener = new MouseAdapter() {
             private JDialog dialog;
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                // 当鼠标进入标签时，显示提示框
                 dialog = new JDialog((JFrame) null, "Aide", false);
 
-                ImageIcon icon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg"); // 替换为实际图标文件的路径
+                ImageIcon icon = new ImageIcon("src/Picture/ogo_D.jpg");
                 dialog.setIconImage(icon.getImage());
 
                 int xOffset = 10;
@@ -360,8 +318,8 @@ public class Gestion_binome {
                 dialog.setLocation(xPosition, yPosition);
 
                 JLabel label = new JLabel("<html>Les notes dans la zone rouge peuvent être modifiées directement en cliquant dessus. <br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
-                label.setPreferredSize(new Dimension(380, 100)); // 设置首选大小
-                label.setMaximumSize(new Dimension(500, 100)); // 设置最大大小以确保不会扩展
+                label.setPreferredSize(new Dimension(380, 100));
+                label.setMaximumSize(new Dimension(500, 100));
                 dialog.add(label);
                 dialog.pack();
                 dialog.setVisible(true);
@@ -369,7 +327,6 @@ public class Gestion_binome {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                // 当鼠标离开标签时，隐藏提示框
                 if (dialog != null) {
                     dialog.setVisible(false);
                     dialog.dispose();
@@ -379,11 +336,10 @@ public class Gestion_binome {
 
 
         //Aide功能实现
-        ImageIcon imageIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\wenhao.jpeg");
-        Image image = imageIcon.getImage(); // 转换为Image对象
+        ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
+        Image image = imageIcon.getImage();
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
-        imageIcon = new ImageIcon(newImage); // 重新生成ImageIcon
-
+        imageIcon = new ImageIcon(newImage);
         JLabel reminderLabel = new JLabel(imageIcon);
         reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
         buttonPanel.add(reminderLabel, BorderLayout.EAST);
@@ -392,7 +348,7 @@ public class Gestion_binome {
 
 
 
-    // 建立数据库连接
+    // connexion base de donnée
     private void establishDatabaseConnection() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
@@ -402,15 +358,11 @@ public class Gestion_binome {
         }
     }
 
-
-    // 设置窗口图标
     private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("C:\\Users\\MATEBOOK14\\Desktop\\Gestion_projets\\logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
-
-    // 设置主窗口
     private void setupMainFrame() {
         frame = new JFrame("Gestion des Binômes du projet : " + getProjectName(projectNumber));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -425,7 +377,6 @@ public class Gestion_binome {
     }
 
 
-    // 更新评分列的方法
     private void updateNoteRapport(int binomeId, Object updatedValue) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -440,7 +391,6 @@ public class Gestion_binome {
     }
 
 
-    // 方法：更新学生1的答辩成绩
     private void updateNoteSoutenanceEtu1(int binomeId, Object updatedValue) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -455,7 +405,6 @@ public class Gestion_binome {
     }
 
 
-    // 方法：更新学生2的答辩成绩
     private void updateNoteSoutenanceEtu2(int binomeId, Object updatedValue) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -470,7 +419,7 @@ public class Gestion_binome {
     }
 
 
-    // 方法：删除binome
+    // supprimer un binome
     private void deleteBinome(int binomeId) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -480,13 +429,14 @@ public class Gestion_binome {
             preparedStatement.executeUpdate();
 
             tableModel.removeRow(getRowIndexById(binomeId));
+            // Afficher un message de confirmation
+            JOptionPane.showMessageDialog(frame, "Le binôme a été supprimé avec succès.", "Confirmation de suppression", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(frame, "Erreur lors de la suppression du binôme : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
 
-    // 方法：根据ID获取行索引
     private int getRowIndexById(int binomeId) {
         for (int row = 0; row < tableModel.getRowCount(); row++) {
             int id = (int) tableModel.getValueAt(row, 0);
@@ -498,7 +448,7 @@ public class Gestion_binome {
     }
 
 
-    // 方法：从数据库加载binome信息
+    // chargement base de donnée
     private static void loadBinomesFromDatabase(int projectNumber) {
         tableModel.setRowCount(0); // 清空表中的现有行
         try {
@@ -529,8 +479,6 @@ public class Gestion_binome {
         }
     }
 
-
-    // 方法：检查表是否存在
     private boolean checkTableExistence(int projectNumber) {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -542,8 +490,6 @@ public class Gestion_binome {
         }
     }
 
-
-    // 方法：创建Binome表
     private void createBinomeTable(int projectNumber) {
         try {
             Statement statement = connection.createStatement();
@@ -566,7 +512,6 @@ public class Gestion_binome {
     }
 
 
-    // 方法：获取项目名称
     private static String getProjectName(int projectId) {
         try {
             String query = "SELECT nom_matiere FROM Projets WHERE numero = ?";
@@ -583,8 +528,6 @@ public class Gestion_binome {
         return "";
     }
 
-
-    // 方法：获取学生姓名
     private static String getStudentName(int studentId) {
         try {
             String query = "SELECT nom, prenom FROM Etudiants WHERE numero = ?";
@@ -603,16 +546,11 @@ public class Gestion_binome {
         return "";
     }
 
-
-    // 方法：过滤表格数据
     private void filterTable(String searchText, JTable binomeTable) {
         RowFilter<DefaultTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + searchText, 1,2, 3,4,5,6,7,8);
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) binomeTable.getRowSorter();
         sorter.setRowFilter(rowFilter);
     }
-
-
-    // 生成PDF文件
     private void generatePDF() {
         // 打开文件选择器
         JFileChooser fileChooser = new JFileChooser();
