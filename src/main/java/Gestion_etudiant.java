@@ -212,7 +212,9 @@ public class Gestion_etudiant{
 
         addStudentButton.addActionListener(new ActionListener() {
             @Override
+
             public void actionPerformed(ActionEvent e) {
+                System.out.println(getMaxProjectNumber());
                 new StudentAddDialog(connection, frame, tableModel);
             }
         });
@@ -225,23 +227,32 @@ public class Gestion_etudiant{
                 if (selectedRow != -1) {
                     int modelRow = studentTable.convertRowIndexToModel(selectedRow);
                     int studentIdToDelete = (int) tableModel.getValueAt(modelRow, 0);
-                    int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer cet étudiant ? Attention : s'il fait partie d'un binôme, il ne pourra pas être supprimé.", "Confirmation", JOptionPane.YES_NO_OPTION);
 
-                    if (choice == JOptionPane.YES_OPTION) {
-                        try {
-                            String deleteSql = "DELETE FROM Etudiants WHERE numero = ?";
-                            PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
-                            preparedStatement.setInt(1, studentIdToDelete);
-                            preparedStatement.executeUpdate();
-                            tableModel.removeRow(modelRow);
+                    // Check if the student is part of any binome
+                    boolean isStudentInBinome = isStudentInBinome(studentIdToDelete);
 
-                            // Affichez une boîte de dialogue d'avertissement indiquant que la suppression a réussi
-                            JOptionPane.showMessageDialog(frame, "Étudiant supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                    if (isStudentInBinome) {
+                        // Display a warning that the student is part of a binome and cannot be deleted
+                        JOptionPane.showMessageDialog(frame, "L'étudiant fait partie d'un binôme et ne peut pas être supprimé.", "Avertissement", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        int choice = JOptionPane.showConfirmDialog(frame, "Êtes-vous sûr de vouloir supprimer cet étudiant ?", "Confirmation", JOptionPane.YES_NO_OPTION);
 
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
-                            // Affichez une boîte de dialogue d'erreur en cas d'échec de la suppression
-                            JOptionPane.showMessageDialog(frame, "L'étudiant fait partie d'un binôme et ne peut pas être supprimé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                        if (choice == JOptionPane.YES_OPTION) {
+                            try {
+                                String deleteSql = "DELETE FROM Etudiants WHERE numero = ?";
+                                PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
+                                preparedStatement.setInt(1, studentIdToDelete);
+                                preparedStatement.executeUpdate();
+                                tableModel.removeRow(modelRow);
+
+                                // Show a success message
+                                JOptionPane.showMessageDialog(frame, "Étudiant supprimé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+                            } catch (SQLException ex) {
+                                ex.printStackTrace();
+                                // Show an error message in case of deletion failure
+                                JOptionPane.showMessageDialog(frame, "Erreur lors de la suppression de l'étudiant.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     }
                 } else {
@@ -249,8 +260,6 @@ public class Gestion_etudiant{
                 }
             }
         });
-
-
 
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
@@ -472,17 +481,6 @@ public class Gestion_etudiant{
     }
 
 
-//    private void setButtonAppearance(AbstractButton button) {
-//        // 外观渲染
-//        try {
-//            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-//            SwingUtilities.updateComponentTreeUI(frame);
-//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-//            ex.printStackTrace();
-//        }
-//    }
-
-
     private JPanel configureNorthPanel() {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
@@ -527,6 +525,72 @@ public class Gestion_etudiant{
                 new Menu();
             }
         });
+    }
+
+
+
+
+
+
+    private int getMaxProjectNumber() {
+        try {
+            String query = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(table_name, '_', -1), '_', 1) AS SIGNED)) FROM information_schema.tables WHERE table_name LIKE 'project_%'";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                resultSet.next();
+                return resultSet.getInt(1);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Handle the exception appropriately in your application
+            return -1; // Return a default value or handle the error case
+        }
+    }
+
+    private boolean isStudentInBinome(int studentId) {
+        try {
+            int maxProjectNumber = getMaxProjectNumber();
+            if (maxProjectNumber > 0) {
+                for (int projectNumber = 1; projectNumber <= maxProjectNumber; projectNumber++) {
+                    String tableName = "project_" + projectNumber;
+
+                    // Check if the table exists
+                    if (isTableExists(tableName)) {
+                        String query = "SELECT COUNT(*) FROM " + tableName + " WHERE (etudiant1_numero = ? OR etudiant2_numero = ?)";
+
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                            preparedStatement.setInt(1, studentId);
+                            preparedStatement.setInt(2, studentId);
+
+                            ResultSet resultSet = preparedStatement.executeQuery();
+                            resultSet.next();
+                            int count = resultSet.getInt(1);
+
+                            if (count > 0) {
+                                // Student is part of a binome in at least one project
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Student is not part of any binome
+            return false;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            // Handle the exception appropriately in your application
+            return false;
+        }
+    }
+
+    private boolean isTableExists(String tableName) throws SQLException {
+        String query = "SELECT 1 FROM information_schema.tables WHERE table_name = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, tableName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        }
     }
 
 }
