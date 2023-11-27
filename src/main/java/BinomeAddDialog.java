@@ -80,6 +80,8 @@ public class BinomeAddDialog extends JFrame {
         validerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Vérifier l'indicateur avant d'autoriser la réouverture de la boîte de dialogue
+
                 String selectedStudent1 = (String) student1ComboBox.getSelectedItem();
                 String selectedStudent2 = (String) student2ComboBox.getSelectedItem();
                 String rapport = rapportField.getText();
@@ -118,7 +120,11 @@ public class BinomeAddDialog extends JFrame {
                         soutenance2Field.setText("");
                         dateRemiseEffectiveField.setText("");
 
+                        // Fermez la fenêtre après avoir ajouté le binôme avec succès
+                        setVisible(false);
                         JOptionPane.showMessageDialog(parentFrame, "Binôme ajouté avec succès!", "Confirmation", JOptionPane.INFORMATION_MESSAGE);
+
+
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
@@ -132,6 +138,7 @@ public class BinomeAddDialog extends JFrame {
         effacerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 student1ComboBox.setSelectedIndex(0);
                 student2ComboBox.setSelectedIndex(0);
                 rapportField.setText("");

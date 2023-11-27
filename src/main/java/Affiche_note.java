@@ -217,7 +217,7 @@ public class Affiche_note {
     }
 
     //on recupere la date de remise
-    private static String getDateRemise(int projectNumber) {
+    static String getDateRemise(int projectNumber) {
         try {
             String query = "SELECT date_remise FROM Projets WHERE numero = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);

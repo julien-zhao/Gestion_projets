@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Gestion_projets:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Gestion_projets_jar</output-path>
+    <root id="archive" name="Gestion_projets.jar">
+      <element id="module-output" name="Gestion_projets" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/itext.jar/itext.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/mysql-connector-j-8.1.0/mysql-connector-j-8.1.0/mysql-connector-j-8.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

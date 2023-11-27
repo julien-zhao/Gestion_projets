@@ -2,6 +2,7 @@
   <library name="lib">
     <CLASSES>
       <root url="file://$USER_HOME$/Downloads/openjfx-21_windows-x64_bin-sdk/javafx-sdk-21/lib" />
+      <root url="jar://$USER_HOME$/Downloads/mysql-connector-j-8.1.0/mysql-connector-j-8.1.0/mysql-connector-j-8.1.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

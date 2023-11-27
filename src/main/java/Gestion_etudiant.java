@@ -46,6 +46,7 @@ public class Gestion_etudiant{
     private JButton addStudentButton;
     private JButton deleteStudentButton;
     private JButton generatePDFButton;
+    private JButton afficheMoyenneButton;
     private JButton retourMenuButton;
 
 
@@ -101,6 +102,7 @@ public class Gestion_etudiant{
         southPanel.add(addStudentButton);
         southPanel.add(deleteStudentButton);
         southPanel.add(generatePDFButton);
+        southPanel.add(afficheMoyenneButton);
         southPanel.add(retourMenuButton);
         southPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // 调整边缘的距离
 
@@ -212,9 +214,7 @@ public class Gestion_etudiant{
 
         addStudentButton.addActionListener(new ActionListener() {
             @Override
-
             public void actionPerformed(ActionEvent e) {
-                System.out.println(getMaxProjectNumber());
                 new StudentAddDialog(connection, frame, tableModel);
             }
         });
@@ -258,6 +258,14 @@ public class Gestion_etudiant{
                 } else {
                     JOptionPane.showMessageDialog(frame, "Veuillez sélectionner un étudiant à supprimer.", "Avertissement", JOptionPane.WARNING_MESSAGE);
                 }
+            }
+        });
+
+
+        afficheMoyenneButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Affiche_moyenne();
             }
         });
 
@@ -395,9 +403,6 @@ public class Gestion_etudiant{
             }
         }
     }
-
-
-
     private JTable createAndConfigureStudentTable() {
         String[] columnNames = {"ID", "Nom", "Prénom", "Formation", "Promotion"};
         tableModel = new DefaultTableModel(columnNames, 0); // Utilisation du modèle de données
@@ -452,7 +457,7 @@ public class Gestion_etudiant{
 
 
 
-    private void establishDatabaseConnection() {
+    public static void establishDatabaseConnection() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
         } catch (SQLException e) {
@@ -494,6 +499,7 @@ public class Gestion_etudiant{
         southPanel.add(addStudentButton);
         southPanel.add(deleteStudentButton);
         southPanel.add(generatePDFButton);
+        southPanel.add(afficheMoyenneButton);
         southPanel.add(retourMenuButton);
         return southPanel;
     }
@@ -512,9 +518,9 @@ public class Gestion_etudiant{
         addStudentButton = new JButton("Ajouter Étudiant");
         deleteStudentButton = new JButton("Supprimer Étudiant");
         generatePDFButton = new JButton("Générer en PDF");
+        afficheMoyenneButton = new JButton("Affiche Moyenne");
         retourMenuButton = new JButton("Retour au Menu");
     }
-
 
 
     private void addReturnMenuListener() {
@@ -528,10 +534,6 @@ public class Gestion_etudiant{
     }
 
 
-
-
-
-
     private int getMaxProjectNumber() {
         try {
             String query = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(table_name, '_', -1), '_', 1) AS SIGNED)) FROM information_schema.tables WHERE table_name LIKE 'project_%'";
@@ -542,8 +544,7 @@ public class Gestion_etudiant{
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-            // Handle the exception appropriately in your application
-            return -1; // Return a default value or handle the error case
+            return -1;
         }
     }
 
@@ -553,11 +554,8 @@ public class Gestion_etudiant{
             if (maxProjectNumber > 0) {
                 for (int projectNumber = 1; projectNumber <= maxProjectNumber; projectNumber++) {
                     String tableName = "project_" + projectNumber;
-
-                    // Check if the table exists
                     if (isTableExists(tableName)) {
                         String query = "SELECT COUNT(*) FROM " + tableName + " WHERE (etudiant1_numero = ? OR etudiant2_numero = ?)";
-
                         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                             preparedStatement.setInt(1, studentId);
                             preparedStatement.setInt(2, studentId);
@@ -567,19 +565,15 @@ public class Gestion_etudiant{
                             int count = resultSet.getInt(1);
 
                             if (count > 0) {
-                                // Student is part of a binome in at least one project
                                 return true;
                             }
                         }
                     }
                 }
             }
-
-            // Student is not part of any binome
             return false;
         } catch (SQLException ex) {
             ex.printStackTrace();
-            // Handle the exception appropriately in your application
             return false;
         }
     }

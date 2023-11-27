@@ -18,11 +18,7 @@ public class StudentAddDialog extends JFrame {
         this.frame = frame;
         this.tableModel = tableModel;
 
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+
 
         setTitle("Ajouter Étudiant");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
