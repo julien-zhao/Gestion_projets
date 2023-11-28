@@ -6,7 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class Menu {
@@ -23,6 +24,7 @@ public class Menu {
         setPanelTransparency();
 
         addTitleLabel();
+        addLogoutButton();
 
         addPanelsToFrame();
 
@@ -41,6 +43,8 @@ public class Menu {
         int x = (screenSize.width - frame.getWidth()) / 2;
         int y = (screenSize.height - frame.getHeight()) / 2;
         frame.setLocation(x, y);
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private void addTitleLabel() {
@@ -109,7 +113,22 @@ public class Menu {
         panel2.add(gestionProjetLabel, gbc2);
     }
 
+    private void addLogoutButton() {
+        JButton logoutButton = new JButton("Déconnexion");
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = JOptionPane.showConfirmDialog(frame, "Voulez-vous vraiment vous déconnecter ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    LoginPage loginPage = new LoginPage();
+                    frame.dispose(); // Fermez la fenêtre actuelle
+                }
+            }
+        });
 
+        // Ajoutez le bouton de déconnexion à la barre de titre
+        frame.add(logoutButton, BorderLayout.NORTH);
+    }
 
     private JLabel createStyledButton(String text, ImageIcon icon) {
         JLabel label = new JLabel(text);

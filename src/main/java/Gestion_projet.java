@@ -263,6 +263,14 @@ public class Gestion_projet {
             }
         });
 
+
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, le bouton est caché
+            addProjectButton.setVisible(false);
+            generatePDFButton.setVisible(false);
+            deleteProjectButton.setVisible(false);
+        }
+
     }
 
 

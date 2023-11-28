@@ -153,6 +153,12 @@ public class Affiche_note {
         JLabel reminderLabel = new JLabel(imageIcon);
         reminderLabel.addMouseListener(mouseListener);
         buttonPanel.add(reminderLabel, BorderLayout.EAST);
+
+
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, le bouton est caché
+            generatePDFButton.setVisible(false);
+        }
     }
 
     // connexion base de donnée

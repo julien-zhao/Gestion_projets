@@ -184,8 +184,18 @@ public class Gestion_etudiant{
                     dialog.dispose();
                 }
             }
+
+
+
         };
 
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, le bouton est caché
+            addStudentButton.setVisible(false);
+            deleteStudentButton.setVisible(false);
+            generatePDFButton.setVisible(false);
+            afficheMoyenneButton.setVisible(false);
+        }
 
         ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage(); // 转换为Image对象
@@ -213,10 +223,10 @@ public class Gestion_etudiant{
             }
         });
 
-
         addStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 new StudentAddDialog(connection, frame, tableModel);
             }
         });

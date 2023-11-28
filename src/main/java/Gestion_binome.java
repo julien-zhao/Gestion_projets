@@ -49,6 +49,9 @@ public class Gestion_binome {
 
         binomeTable.setShowGrid(false);
 
+
+
+
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
@@ -343,6 +346,14 @@ public class Gestion_binome {
         JLabel reminderLabel = new JLabel(imageIcon);
         reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
         buttonPanel.add(reminderLabel, BorderLayout.EAST);
+
+
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, le bouton est caché
+            deleteBinomeButton.setVisible(false);
+            addBinomeButton.setVisible(false);
+            generatePDFButton.setVisible(false);
+        }
     }
 
 
@@ -378,6 +389,11 @@ public class Gestion_binome {
 
 
     private void updateNoteRapport(int binomeId, Object updatedValue) {
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, ne permettez pas la modification
+            JOptionPane.showMessageDialog(frame, "Vous n'avez pas les autorisations pour effectuer cette opération.", "Autorisations insuffisantes", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_rapport = ? WHERE id = ?";
@@ -392,6 +408,11 @@ public class Gestion_binome {
 
 
     private void updateNoteSoutenanceEtu1(int binomeId, Object updatedValue) {
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, ne permettez pas la modification
+            JOptionPane.showMessageDialog(frame, "Vous n'avez pas les autorisations pour effectuer cette opération.", "Autorisations insuffisantes", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_soutenance_etu1 = ? WHERE id = ?";
@@ -406,6 +427,11 @@ public class Gestion_binome {
 
 
     private void updateNoteSoutenanceEtu2(int binomeId, Object updatedValue) {
+        if ("student".equals(LoginPage.getCurrentUserRole())) {
+            // Si le rôle est étudiant, ne permettez pas la modification
+            JOptionPane.showMessageDialog(frame, "Vous n'avez pas les autorisations pour effectuer cette opération.", "Autorisations insuffisantes", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
             String tableName = "Project_" + projectNumber;
             String updateSql = "UPDATE " + tableName + " SET note_soutenance_etu2 = ? WHERE id = ?";

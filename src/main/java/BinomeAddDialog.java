@@ -43,6 +43,10 @@ public class BinomeAddDialog extends JFrame {
         JTextField soutenance1Field = new JTextField(10);
         JTextField soutenance2Field = new JTextField(10);
 
+        rapportField.setText("0");
+        soutenance1Field.setText("0");
+        soutenance2Field.setText("0");
+
         MaskFormatter dateMask = null;
         try {
             dateMask = new MaskFormatter("####-##-##"); // (YYYY-MM-DD)
