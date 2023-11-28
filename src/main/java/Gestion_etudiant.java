@@ -58,7 +58,9 @@ public class Gestion_etudiant{
         setupMainFrame();
 
         setIcons();
+
         createAndConfigureStudentTable();
+
         configureButtons();
 
         configureSearchField();
@@ -167,9 +169,9 @@ public class Gestion_etudiant{
                 int xPosition = componentPosition.x + xOffset;
                 int yPosition = componentPosition.y - dialog.getHeight() - yOffset;
                 dialog.setLocation(xPosition, yPosition);
-                JLabel label = new JLabel("<html>Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.  \n Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
-                label.setPreferredSize(new Dimension(300, 100));
-                label.setMaximumSize(new Dimension(500, 100));
+                JLabel label = new JLabel("<html> - Lorsque vous souhaitez supprimer les informations relatives à un élève, vous devez d'abord sélectionner l'élève en cliquant dessus, puis appuyer sur le bouton de suppression.  <br><br> - Si vous avez d'autres questions, veuillez contacter : info@dauphine.eu</html>");
+                label.setPreferredSize(new Dimension(300, 130));
+                label.setMaximumSize(new Dimension(500, 130));
                 dialog.add(label);
                 dialog.pack();
                 dialog.setVisible(true);

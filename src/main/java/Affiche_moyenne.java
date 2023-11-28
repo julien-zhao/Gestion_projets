@@ -13,7 +13,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,26 +35,93 @@ public class Affiche_moyenne {
     public DefaultTableModel tableModel;
     private JFrame frame;
 
+
+
+
     public Affiche_moyenne() {
-        // Établir la connexion à la base de données
         establishDatabaseConnection();
+        initializeTableModel();
+        createAndShowFrame();
+        setIcons();
+        addGeneratePdfAndExportButtons();
+        afficherTableauMoyennes();
+    }
 
-        // Initialiser le modèle de tableau
+
+
+    private void establishDatabaseConnection() {
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
+    private void initializeTableModel() {
         tableModel = new DefaultTableModel();
+    }
 
-        // Création du frame et ajout du tableau
+    private void createAndShowFrame() {
         frame = new JFrame("Tableau des moyennes");
         frame.setLayout(new BorderLayout());
 
-        JTable table = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(table);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        // Affichage du frame
-        frame.setSize(800, 600);
+        JTable studentTable = createAndConfigureStudentTable();  // Use the method to create and configure the JTable
+        JScrollPane tableScrollPane = new JScrollPane(studentTable);
+        tableScrollPane.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(15, 20, 0, 20),
+                BorderFactory.createLineBorder(new Color(108, 190, 213), 2, true)
+        ));
+        frame.add(tableScrollPane, BorderLayout.CENTER);
+
+        frame.setSize(1000, 700);
+
+        // Center the frame on the screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - frame.getWidth()) / 2;
+        int y = (screenSize.height - frame.getHeight()) / 2;
+        frame.setLocation(x, y);
+
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setVisible(true);
+    }
 
-// Ajout d'un bouton pour générer le PDF
+    private JTable createAndConfigureStudentTable() {
+        JTable studentTable = new JTable(tableModel);
+        studentTable.setShowGrid(false);
+
+        JTableHeader header = studentTable.getTableHeader();
+        header.setBackground(new Color(108, 190, 213));
+        header.setForeground(Color.WHITE); // 设置列头前景颜色
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));
+
+        studentTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        studentTable.setRowHeight(23);
+
+        studentTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (row % 2 == 0) {
+                    c.setBackground(new Color(240, 240, 240));
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                if (isSelected) {
+                    c.setBackground(new Color(173, 216, 230));
+                }
+                return c;
+            }
+        });
+        return studentTable;
+    }
+
+    private void setIcons() {
+        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        frame.setIconImage(customIcon.getImage());
+    }
+
+    private void addGeneratePdfAndExportButtons() {
         JButton generatePdfButton = new JButton("Générer PDF");
         generatePdfButton.addActionListener(new ActionListener() {
             @Override
@@ -61,7 +130,6 @@ public class Affiche_moyenne {
             }
         });
 
-// Ajout d'un bouton pour exporter vers Excel
         JButton exportExcelButton = new JButton("Exporter vers Excel");
         exportExcelButton.addActionListener(new ActionListener() {
             @Override
@@ -73,11 +141,12 @@ public class Affiche_moyenne {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(generatePdfButton);
         buttonPanel.add(exportExcelButton);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // 调整边缘的距离
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Afficher le tableau des moyennes dès la création de l'instance
-        afficherTableauMoyennes();
     }
+
+
 
     public void afficherTableauMoyennes() {
         // Ajouter les colonnes nécessaires
@@ -207,15 +276,6 @@ public class Affiche_moyenne {
             preparedStatement.setInt(1, projectNumber);
             ResultSet resultSet = preparedStatement.executeQuery();
             return resultSet.next() ? resultSet.getDate("date_remise") : null;
-        }
-    }
-
-    private void establishDatabaseConnection() {
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return;
         }
     }
 

@@ -77,49 +77,56 @@ public class Gestion_projet {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         LogoDauphine logoDauphine = new LogoDauphine();
-        mainPanel.add(logoDauphine);
+        logoDauphine.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 20));
+//        mainPanel.add(logoDauphine);
+
 
 
         JPanel searchPanel = new JPanel();
+        searchPanel.add(logoDauphine);
         searchPanel.add(new JLabel("Recherche : "));
         searchPanel.add(searchField);
         mainPanel.add(searchPanel);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(addProjectButton);
-        buttonPanel.add(deleteProjectButton);
-        buttonPanel.add(gestionBinomeButton);
-        buttonPanel.add(generatePDFButton);
-        buttonPanel.add(retourMenuButton);
-
-        mainPanel.add(tableScrollPane);
-
-        mainPanel.add(buttonPanel);
-
-
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));
-
-
-
-//        // 创建搜索面板
-//        JPanel searchPanel = new JPanel();
-//        searchPanel.add(new JLabel("Recherche : "));
-//        searchPanel.add(searchField);
-//
-//        // 创建按钮面板，包括"添加项目"和"返回菜单"按钮
 //        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 //        buttonPanel.add(addProjectButton);
 //        buttonPanel.add(deleteProjectButton);
 //        buttonPanel.add(gestionBinomeButton);
 //        buttonPanel.add(generatePDFButton);
+////        buttonPanel.add(new JLabel("            ")); //添加占位的空标签
 //        buttonPanel.add(retourMenuButton);
-//
-//        // 创建主面板
-//        JPanel mainPanel = new JPanel(new BorderLayout());
-//        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
-//        mainPanel.add(searchPanel, BorderLayout.NORTH);
-//        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-//        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
+//        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));
+
+        // 创建面板并设置布局
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // 添加按钮到面板
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        buttonPanel.add(addProjectButton, gbc);
+
+        gbc.gridx = 1;
+        gbc.insets = new Insets(0, 0, 0, 20);
+        buttonPanel.add(deleteProjectButton, gbc);
+
+        gbc.gridx = 2;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        buttonPanel.add(gestionBinomeButton, gbc);
+
+        gbc.gridx = 3;
+        gbc.insets = new Insets(0, 0, 0, 20);
+        buttonPanel.add(generatePDFButton, gbc);
+
+        gbc.gridx = 4;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        buttonPanel.add(retourMenuButton, gbc);
+
+        mainPanel.add(tableScrollPane);
+        mainPanel.add(buttonPanel);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));
+
 
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
