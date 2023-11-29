@@ -37,11 +37,8 @@ import javax.swing.table.*;
 public class Gestion_etudiant{
     private static Connection connection = null;
     private static DefaultTableModel tableModel;
-
     JPanel mainPanel = new JPanel(new BorderLayout());
-    private JPanel northPanel;
-    private JPanel southPanel;
-    JFrame frame = new JFrame("Gestion des Projets Étudiants");
+    JFrame frame = new JFrame("Gestion des étudiants");
     JTextField searchField = new JTextField(20);
     private JButton addStudentButton;
     private JButton deleteStudentButton;
@@ -112,11 +109,11 @@ public class Gestion_etudiant{
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
 
-
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
         loadStudentsFromDatabase();
+
 
         JComboBox<String> formationFilter = new JComboBox<>();
         formationFilter.addItem("All");
@@ -137,6 +134,8 @@ public class Gestion_etudiant{
         });
         northPanel.add(formationFilter);
 
+
+
         JComboBox<String> promotionFilter = new JComboBox<>();
         promotionFilter.addItem("All");
         promotionFilter.addItem("Initial");
@@ -155,6 +154,7 @@ public class Gestion_etudiant{
             }
         });
         northPanel.add(promotionFilter);
+
 
 
         MouseListener mouseListener = new MouseAdapter() {

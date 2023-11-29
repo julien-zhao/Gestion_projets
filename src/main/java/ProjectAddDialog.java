@@ -26,7 +26,7 @@ public class ProjectAddDialog {
         ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(icon.getImage());
 
-        JPanel mainPanel = new JPanel(new GridLayout(6, 2));
+        JPanel mainPanel = new JPanel(new GridLayout(4, 2));
 
         matiereField = new JTextField(10);
         sujetField = new JTextField(10);

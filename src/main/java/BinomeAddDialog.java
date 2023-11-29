@@ -33,7 +33,7 @@ public class BinomeAddDialog extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(new Dimension(400, 250));
 
-        JPanel mainPanel = new JPanel(new GridLayout(8, 2));
+        JPanel mainPanel = new JPanel(new GridLayout(7, 2));
 
         initializeStudentsInBinome();
         JComboBox<String> student1ComboBox = new JComboBox<>(getStudentOptions());

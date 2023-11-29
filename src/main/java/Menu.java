@@ -24,6 +24,7 @@ public class Menu {
         setPanelTransparency();
 
         addTitleLabel();
+
         addLogoutButton();
 
         addPanelsToFrame();
@@ -115,6 +116,26 @@ public class Menu {
 
     private void addLogoutButton() {
         JButton logoutButton = new JButton("Déconnexion");
+
+        // 设置按钮的字体，背景颜色和前景颜色
+        Font buttonFont = new Font("Arial", Font.BOLD, 14);
+        logoutButton.setFont(buttonFont);
+        logoutButton.setBackground(new Color(255, 182, 193)); // 浅红色的 RGB 值
+        logoutButton.setForeground(Color.BLACK);
+
+        // 鼠标进入按钮时加深颜色
+        logoutButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                logoutButton.setBackground(new Color(255, 140, 149)); // 加深红色的 RGB 值
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                logoutButton.setBackground(new Color(255, 182, 193)); // 恢复浅红色的 RGB 值
+            }
+        });
+
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -127,8 +148,10 @@ public class Menu {
         });
 
         // Ajoutez le bouton de déconnexion à la barre de titre
-        frame.add(logoutButton, BorderLayout.NORTH);
+        frame.add(logoutButton, BorderLayout.SOUTH);
     }
+
+
 
     private JLabel createStyledButton(String text, ImageIcon icon) {
         JLabel label = new JLabel(text);

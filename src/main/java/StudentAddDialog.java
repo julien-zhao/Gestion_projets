@@ -24,7 +24,7 @@ public class StudentAddDialog extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(new Dimension(400, 200));
 
-        JPanel mainPanel = new JPanel(new GridLayout(6, 2));
+        JPanel mainPanel = new JPanel(new GridLayout(5, 2));
 
         JTextField studentNameField = new JTextField(10);
         JTextField studentFirstNameField = new JTextField(10);

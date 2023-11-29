@@ -2,32 +2,49 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class LoginPage extends JFrame {
 
     private JTextField usernameField;
     private JPasswordField passwordField;
-    private JComboBox<String> roleComboBox;
+    private JRadioButton studentRadioButton;
+    private JRadioButton teacherRadioButton;
     private static String currentUserRole;
 
     public LoginPage() {
+        initializeUI();
+    }
+
+    private void initializeUI() {
         setTitle("Login Page");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridBagLayout());
+        setContentPane(new TransparentPanel(new BorderLayout())); // Use BorderLayout for the main panel
+
+        JPanel panel = createMainPanel();
+        add(panel);
+
+        setVisible(true);
+
+        Image iconImage = new ImageIcon("src/Picture/logo_D.jpg").getImage();
+        setIconImage(iconImage);
+    }
+
+    private JPanel createMainPanel() {
+        JPanel panel = new TransparentPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
 
-        // Logo and Text
-        JLabel logoLabel = new JLabel(new ImageIcon("src/Picture/dauphine-psl.png"));
+        addLogoAndTitle(panel, constraints);
+        addLoginForm(panel, constraints);
 
+        return panel;
+    }
+
+    private void addLogoAndTitle(JPanel panel, GridBagConstraints constraints) {
         JLabel titleLabel = new JLabel("Université Paris Dauphine - PSL");
         titleLabel.setForeground(Color.BLACK);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
@@ -36,111 +53,154 @@ public class LoginPage extends JFrame {
         constraints.gridy = 0;
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
-        panel.add(logoLabel, constraints);
-
-        constraints.gridy = 1;
         panel.add(titleLabel, constraints);
+    }
 
-        // Login Form
-        JLabel usernameLabel = new JLabel("Username:");
-        JLabel passwordLabel = new JLabel("Password:");
-        JLabel roleLabel = new JLabel("");
-
+    private void addLoginForm(JPanel panel, GridBagConstraints constraints) {
+        JLabel usernameLabel = new JLabel("Username");
+        JLabel passwordLabel = new JLabel("Password");
 
         usernameField = new JTextField(15);
         passwordField = new JPasswordField(15);
 
-        String[] roles = {"student", "teacher"};
-        roleComboBox = new JComboBox<>(roles);
-        roleComboBox.setSelectedItem(null); // Set initially selected item to null
+        ButtonGroup roleButtonGroup = new ButtonGroup();
+        studentRadioButton = new JRadioButton("Student ");
+        teacherRadioButton = new JRadioButton("Teacher");
+
+        // Set the opaque property to false for transparency
+        studentRadioButton.setOpaque(false);
+        teacherRadioButton.setOpaque(false);
+
+        roleButtonGroup.add(studentRadioButton);
+        roleButtonGroup.add(teacherRadioButton);
+
+        JButton loginButton = createLoginButton();
+
+        addFormField(panel, constraints, usernameLabel, 0, 2);
+        addFormField(panel, constraints, usernameField, 1, 2);
+        addFormField(panel, constraints, passwordLabel, 0, 3);
+        addFormField(panel, constraints, passwordField, 1, 3);
+
+        // Add radio buttons horizontally
+        JPanel rolePanel = new TransparentPanel(); // Transparent panel for the role buttons
+        rolePanel.add(studentRadioButton);
+        rolePanel.add(teacherRadioButton);
+        addFormField(panel, constraints, rolePanel, 1, 4);
+
+        addFormField(panel, constraints, loginButton, 0, 5, 2);
+    }
 
 
 
+    private JButton createLoginButton() {
         JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                char[] passwordChars = passwordField.getPassword();
-                String password = new String(passwordChars);
-                String role = (String) roleComboBox.getSelectedItem();
-
-                if (authenticate(username, password, role)) {
-                    // Stocke le rôle de l'utilisateur
-                    currentUserRole = role;
-
-                    JOptionPane.showMessageDialog(LoginPage.this, "Login Successful");
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            new Menu();
-                            dispose(); // Close the login window
-                        }
-                    });
-                } else {
-                    JOptionPane.showMessageDialog(LoginPage.this, "Invalid Username, Password, or Role", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
+        loginButton.addActionListener(e -> handleLogin());
         loginButton.setPreferredSize(new Dimension(120, 30));
         loginButton.setBackground(new Color(71, 120, 197));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
         loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+        return loginButton;
+    }
 
-        constraints.gridx = 0;
-        constraints.gridy = 2;
-        panel.add(usernameLabel, constraints);
+    private void addFormField(JPanel panel, GridBagConstraints constraints, JComponent component, int x, int y) {
+        constraints.gridx = x;
+        constraints.gridy = y;
+        panel.add(component, constraints);
+    }
 
-        constraints.gridx = 1;
-        panel.add(usernameField, constraints);
+    private void addFormField(JPanel panel, GridBagConstraints constraints, JComponent component, int x, int y, int width) {
+        constraints.gridx = x;
+        constraints.gridy = y;
+        constraints.gridwidth = width;
+        panel.add(component, constraints);
+    }
 
-        constraints.gridx = 0;
-        constraints.gridy = 3;
-        panel.add(passwordLabel, constraints);
+    private void handleLogin() {
+        String username = usernameField.getText();
+        char[] passwordChars = passwordField.getPassword();
+        String password = new String(passwordChars);
+        String role = studentRadioButton.isSelected() ? "student" : "teacher";
 
-        constraints.gridx = 1;
-        panel.add(passwordField, constraints);
+        if (authenticate(username, password, role)) {
+            currentUserRole = role;
+            // 在认证成功时自动弹出 "Login Successful" 消息
+            showMessage("Login Successful", "Message", JOptionPane.INFORMATION_MESSAGE, 500);
 
-        constraints.gridx = 0;
-        constraints.gridy = 4;
-        panel.add(roleLabel, constraints);
+            // 在一秒后执行下面的任务
+            Timer timer = new Timer(500, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingUtilities.invokeLater(() -> {
+                        new Menu();
+                        dispose();
+                    });
+                }
+            });
+            timer.setRepeats(false); // 仅执行一次
+            timer.start();
+        } else {
+            // 只在认证失败时弹出消息框
+            JOptionPane.showMessageDialog(this, "Invalid Username, Password, or Role", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-        constraints.gridx = 1;
-        panel.add(roleComboBox, constraints);
+    private void showMessage(String message, String title, int messageType, int duration) {
+        JOptionPane optionPane = new JOptionPane(message, messageType);
+        JDialog dialog = optionPane.createDialog(title);
 
-        constraints.gridx = 0;
-        constraints.gridy = 5;
-        constraints.gridwidth = 2;
-        panel.add(loginButton, constraints);
+        Timer timer = new Timer(duration, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dialog.setVisible(false);
+            }
+        });
+        timer.setRepeats(false); // 仅执行一次
 
-        add(panel);
-
-        setVisible(true);
+        timer.start();
+        dialog.setVisible(true);
     }
 
     private boolean authenticate(String username, String password, String role) {
-        // Replace with your database connection code
-        try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root")) {
             String query = "SELECT * FROM users WHERE username = ? AND password = ? AND role = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-            preparedStatement.setString(3, role);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.next();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password);
+                preparedStatement.setString(3, role);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    return resultSet.next();
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-
-    // Méthode pour obtenir le rôle de l'utilisateur actuel
     public static String getCurrentUserRole() {
         return currentUserRole;
     }
 
+    // Custom JPanel for background image with transparency
+    private class TransparentPanel extends JPanel {
+        public TransparentPanel() {
+            setOpaque(false);
+        }
+
+        public TransparentPanel(LayoutManager layout) {
+            super(layout);
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f)); // Adjust the transparency here
+            Image bgImage = new ImageIcon("src/Picture/uni_logo.jpeg").getImage();
+            g2d.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+            g2d.dispose();
+        }
+    }
 }
