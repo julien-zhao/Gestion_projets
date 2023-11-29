@@ -10,12 +10,16 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
+import javax.swing.plaf.basic.BasicOptionPaneUI;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,10 +36,8 @@ import java.util.List;
 
 public class Affiche_moyenne {
     private static Connection connection;
-    public DefaultTableModel tableModel;
+    public static DefaultTableModel tableModel;
     private JFrame frame;
-
-
 
 
     public Affiche_moyenne() {
@@ -45,7 +47,15 @@ public class Affiche_moyenne {
         setIcons();
         addGeneratePdfAndExportButtons();
         afficherTableauMoyennes();
+
     }
+
+
+
+
+
+
+
 
 
 
@@ -86,7 +96,10 @@ public class Affiche_moyenne {
         frame.setVisible(true);
     }
 
+
+
     private JTable createAndConfigureStudentTable() {
+
         JTable studentTable = new JTable(tableModel);
         studentTable.setShowGrid(false);
 
@@ -113,39 +126,9 @@ public class Affiche_moyenne {
                 return c;
             }
         });
+
         return studentTable;
     }
-
-    private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
-        frame.setIconImage(customIcon.getImage());
-    }
-
-    private void addGeneratePdfAndExportButtons() {
-        JButton generatePdfButton = new JButton("Générer PDF");
-        generatePdfButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                generatePDF(tableModel);
-            }
-        });
-
-        JButton exportExcelButton = new JButton("Exporter vers Excel");
-        exportExcelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                exportToExcel(tableModel);
-            }
-        });
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(generatePdfButton);
-        buttonPanel.add(exportExcelButton);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // 调整边缘的距离
-        frame.add(buttonPanel, BorderLayout.SOUTH);
-
-    }
-
 
 
     public void afficherTableauMoyennes() {
@@ -167,7 +150,6 @@ public class Affiche_moyenne {
             }
 
             tableModel.addColumn("Moyenne Finale");
-
             // Récupérer la liste des étudiants
             ResultSet resultSetEtudiants = statement.executeQuery("SELECT numero FROM Etudiants");
 
@@ -210,11 +192,58 @@ public class Affiche_moyenne {
                 // Ajouter la ligne de données au modèle du tableau
                 tableModel.addRow(rowData);
 
+
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+
+
+
+
+    private void setIcons() {
+        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        frame.setIconImage(customIcon.getImage());
+    }
+
+    private void addGeneratePdfAndExportButtons() {
+        JButton generatePdfButton = new JButton("Générer PDF");
+        generatePdfButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generatePDF(tableModel);
+            }
+        });
+
+        JButton exportExcelButton = new JButton("Exporter vers Excel");
+        exportExcelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exportToExcel(tableModel);
+            }
+        });
+
+        JButton generateGraphButton = new JButton("Générer un graphique");
+        generateGraphButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Appeler la méthode pour générer le graphique
+                generateGraph();
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(generatePdfButton);
+        buttonPanel.add(exportExcelButton);
+        buttonPanel.add(generateGraphButton);  // Ajouter le nouveau bouton
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+    }
+
     private double getNoteRapport(int etudiantId, int projectNumber) throws SQLException {
         String tableName = "project_" + projectNumber;
         String query = "SELECT note_rapport FROM " + tableName + " WHERE etudiant1_numero = ? OR etudiant2_numero = ?";
@@ -269,7 +298,6 @@ public class Affiche_moyenne {
         }
     }
 
-
     private Date getDateRemiseProjet(int projectNumber) throws SQLException {
         String query = "SELECT date_remise FROM Projets WHERE numero = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -278,7 +306,6 @@ public class Affiche_moyenne {
             return resultSet.next() ? resultSet.getDate("date_remise") : null;
         }
     }
-
 
     // Méthode pour calculer le nombre de jours de retard
     private int calculateDaysOfDelay(Date dateRemise, Date dateRemiseEffective) {
@@ -368,7 +395,6 @@ public class Affiche_moyenne {
         }
     }
 
-
     private void exportToExcel(DefaultTableModel model) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer le fichier Excel");
@@ -417,4 +443,47 @@ public class Affiche_moyenne {
             }
         }
     }
+
+
+
+
+
+    private void generateGraph() {
+        // Créer un ensemble de données de catégorie
+        CategoryDataset dataset = createDataset();
+
+        // Créer un graphique à barres
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Moyennes des étudiants",
+                "Étudiants",
+                "Moyennes",
+                dataset
+        );
+
+        // Afficher le graphique dans une fenêtre
+        JFrame chartFrame = new JFrame("Graphique des moyennes");
+        chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ChartPanel chartPanel = new ChartPanel(barChart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(560, 370));
+        chartFrame.setContentPane(chartPanel);
+        chartFrame.pack();
+        chartFrame.setVisible(true);
+    }
+
+
+
+    private CategoryDataset createDataset() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        // Ajouter les moyennes des étudiants au jeu de données
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            String etudiant = tableModel.getValueAt(row, 0).toString();
+            double moyenne = Double.parseDouble(tableModel.getValueAt(row, tableModel.getColumnCount() - 1).toString());
+            dataset.addValue(moyenne, "Étudiants", etudiant);
+        }
+
+        return dataset;
+    }
+
+
 }
