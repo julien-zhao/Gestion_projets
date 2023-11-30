@@ -144,6 +144,8 @@ public class Affiche_note {
             }
         };
 
+
+        // Ajouter l'icône d'aide
         ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage();
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小

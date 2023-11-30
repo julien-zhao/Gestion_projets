@@ -325,7 +325,7 @@ public class Gestion_binome {
             public void mouseEntered(MouseEvent e) {
                 dialog = new JDialog((JFrame) null, "Aide", false);
 
-                ImageIcon icon = new ImageIcon("src/Picture/ogo_D.jpg");
+                ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
                 dialog.setIconImage(icon.getImage());
 
                 int xOffset = 10;
