@@ -207,7 +207,7 @@ public class Affiche_moyenne {
 
     private void setIcons() {
         // Définir l'icône du cadre
-        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         frame.setIconImage(customIcon.getImage());
     }
 

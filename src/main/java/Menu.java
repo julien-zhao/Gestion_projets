@@ -40,14 +40,18 @@ public class Menu {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 700);
         frame.setLayout(null);
-        frame.setIconImage(new ImageIcon("src/Picture/logo_D.jpg").getImage());
+
+        // Chargement de l'icône depuis le classpath
+        ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
+        Image iconImage = icon.getImage();
+        frame.setIconImage(iconImage);
+
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - frame.getWidth()) / 2;
         int y = (screenSize.height - frame.getHeight()) / 2;
         frame.setLocation(x, y);
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+
 
     // Ajoute le titre à la fenêtre principale
     private void addTitleLabel() {
@@ -72,12 +76,17 @@ public class Menu {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
-                Image bgImage = new ImageIcon("src/Picture/uni_logo.jpeg").getImage();
+
+                // Chargement de l'image depuis le classpath
+                ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/uni_logo.jpeg"));
+                Image bgImage = icon.getImage();
+
                 g2d.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
                 g2d.dispose();
             }
         });
     }
+
 
 
     // Définit la transparence du panneau
@@ -94,15 +103,15 @@ public class Menu {
 
     // Définit les icônes de la fenêtre
     private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         frame.setIconImage(customIcon.getImage());
     }
 
 
     // Ajoute les libellés au panneau2
     private void addLabelsToPanel2() {
-        ImageIcon etudiantsIcon = new ImageIcon("src/Picture/etu.png");
-        ImageIcon projetsIcon = new ImageIcon("src/Picture/proj.png");
+        ImageIcon etudiantsIcon = new ImageIcon(getClass().getResource("/Picture/etu.png"));
+        ImageIcon projetsIcon = new ImageIcon(getClass().getResource("/Picture/proj.png"));
 
         JLabel gestionEtudiantLabel = createStyledButton("Gestion des étudiants", etudiantsIcon);
         JLabel gestionProjetLabel = createStyledButton("Gestion des projets", projetsIcon);

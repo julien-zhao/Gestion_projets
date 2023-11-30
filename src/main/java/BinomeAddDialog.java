@@ -79,7 +79,7 @@ public class BinomeAddDialog extends JFrame {
 
         add(mainPanel);
 
-        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         setIconImage(icon.getImage());
 
         //Button pour valider

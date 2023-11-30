@@ -48,7 +48,7 @@ public class StudentAddDialog extends JFrame {
         mainPanel.add(effacerButton);
         add(mainPanel);
 
-        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         setIconImage(icon.getImage());
 
         validerButton.addActionListener(new ActionListener() {

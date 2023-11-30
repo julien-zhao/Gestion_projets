@@ -12,7 +12,7 @@ public class LogoDauphine extends JPanel {
     public LogoDauphine() {
         try {
             // Charge l'image du logo de Dauphine depuis le fichier spécifié
-            logoImage = ImageIO.read(new File("src/Picture/Dauphine_logo.png"));
+            logoImage = ImageIO.read(new File("src/main/resources/Picture/Dauphine_logo.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -23,7 +23,7 @@ public class ProjectAddDialog {
         frame = new JFrame("Ajouter un Projet");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         frame.setIconImage(icon.getImage());
 
         JPanel mainPanel = new JPanel(new GridLayout(4, 2));
