@@ -29,18 +29,24 @@ public class Gestion_projet {
     static Gestion_projet currentInstance; // Variable statique pour stocker l'instance actuelle
 
 
+    // Méthode principale pour initialiser la classe Gestion_projet
     Gestion_projet() {
+        // Établir la connexion à la base de données
         establishDatabaseConnection();
 
+        // Configuration de la fenêtre principale
         setupMainFrame();
 
+        // Configuration des icônes
         setIcons();
 
+        // Définition des noms de colonnes pour le modèle de table
         String[] columnNames = {"Numero", "Nom Matière", "Sujet", "Date de Remise"};
         tableModel = new DefaultTableModel(columnNames, 0);
         projectTable = new JTable(tableModel);
         projectTable.setShowGrid(false);
 
+        // Mise en place d'un trieur de table insensible à la casse
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
@@ -75,11 +81,6 @@ public class Gestion_projet {
         tableColumnModel.getColumn(0).setResizable(false);
 
 
-
-
-
-
-
         //-------------------------------------------------------------------------
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Recherche : "));
@@ -107,9 +108,10 @@ public class Gestion_projet {
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-
-
-
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setVisible(true);
+        loadProjectsFromDatabase();
 
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -126,12 +128,6 @@ public class Gestion_projet {
             public void changedUpdate(DocumentEvent e) {
             }
         });
-
-        frame.add(mainPanel);
-        frame.pack();
-        frame.setVisible(true);
-        loadProjectsFromDatabase();
-
 
         addProjectButton.addActionListener(new ActionListener() {
             @Override
@@ -190,7 +186,6 @@ public class Gestion_projet {
             }
         });
 
-
         gestionBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -207,7 +202,6 @@ public class Gestion_projet {
             }
         });
 
-
         retourMenuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -215,7 +209,6 @@ public class Gestion_projet {
                 new Menu();
             }
         });
-
 
         JTableHeader header = projectTable.getTableHeader();
         header.setBackground(new Color(108, 190, 213));
@@ -246,7 +239,6 @@ public class Gestion_projet {
             }
         });
 
-
         if ("student".equals(LoginPage.getCurrentUserRole())) {
             // Si le rôle est étudiant, le bouton est caché
             addProjectButton.setVisible(false);
@@ -257,6 +249,7 @@ public class Gestion_projet {
     }
 
 
+    // Méthode pour établir la connexion à la base de données
     private void establishDatabaseConnection() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
@@ -284,6 +277,7 @@ public class Gestion_projet {
     }
 
 
+    // Méthode pour charger les projets depuis la base de données
     private static void loadProjectsFromDatabase() {
         try {
             String sql = "SELECT numero,nom_matiere, sujet, date_remise FROM Projets";
@@ -306,12 +300,16 @@ public class Gestion_projet {
         }
     }
 
+
+    // Méthode pour filtrer les données de la table en fonction de la recherche
     private void filterTable(String searchText, JTable projectTable) {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
         projectTable.setRowSorter(sorter);
     }
 
+
+    // Méthode pour obtenir l'index de la colonne par son nom
     private int getColumnIndex(String columnName) {
         for (int i = 0; i < tableModel.getColumnCount(); i++) {
             if (columnName.equals(tableModel.getColumnName(i))) {
@@ -320,6 +318,7 @@ public class Gestion_projet {
         }
         return -1;
     }
+
 
     private int getPrimaryKeyValueFromSelectedRow() {
         int projectNumber = -1;
@@ -457,6 +456,7 @@ public class Gestion_projet {
     }
 
 
+    // Méthode pour générer le fichier PDF à partir des données de la table
     private void generatePDF() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer le PDF");

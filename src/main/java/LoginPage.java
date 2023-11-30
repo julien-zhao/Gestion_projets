@@ -16,6 +16,8 @@ public class LoginPage extends JFrame {
         initializeUI();
     }
 
+
+    // Initialise l'interface utilisateur
     private void initializeUI() {
         setTitle("Login Page");
         setSize(400, 300);
@@ -33,6 +35,8 @@ public class LoginPage extends JFrame {
         setIconImage(iconImage);
     }
 
+
+    // Crée le panneau principal
     private JPanel createMainPanel() {
         JPanel panel = new TransparentPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -44,6 +48,8 @@ public class LoginPage extends JFrame {
         return panel;
     }
 
+
+    // Ajoute le logo et le titre
     private void addLogoAndTitle(JPanel panel, GridBagConstraints constraints) {
         JLabel titleLabel = new JLabel("Université Paris Dauphine - PSL");
         titleLabel.setForeground(Color.BLACK);
@@ -56,6 +62,8 @@ public class LoginPage extends JFrame {
         panel.add(titleLabel, constraints);
     }
 
+
+    // Ajoute le formulaire de connexion
     private void addLoginForm(JPanel panel, GridBagConstraints constraints) {
         JLabel usernameLabel = new JLabel("Username");
         JLabel passwordLabel = new JLabel("Password");
@@ -67,7 +75,7 @@ public class LoginPage extends JFrame {
         studentRadioButton = new JRadioButton("Student ");
         teacherRadioButton = new JRadioButton("Teacher");
 
-        // Set the opaque property to false for transparency
+        // Définis la propriété opaque sur false pour la transparence
         studentRadioButton.setOpaque(false);
         teacherRadioButton.setOpaque(false);
 
@@ -82,7 +90,7 @@ public class LoginPage extends JFrame {
         addFormField(panel, constraints, passwordField, 1, 3);
 
         // Add radio buttons horizontally
-        JPanel rolePanel = new TransparentPanel(); // Transparent panel for the role buttons
+        JPanel rolePanel = new TransparentPanel();
         rolePanel.add(studentRadioButton);
         rolePanel.add(teacherRadioButton);
         addFormField(panel, constraints, rolePanel, 1, 4);
@@ -91,7 +99,7 @@ public class LoginPage extends JFrame {
     }
 
 
-
+    // Crée le bouton de connexion
     private JButton createLoginButton() {
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(e -> handleLogin());
@@ -103,12 +111,16 @@ public class LoginPage extends JFrame {
         return loginButton;
     }
 
+
+    // Ajoute un champ de formulaire au panneau
     private void addFormField(JPanel panel, GridBagConstraints constraints, JComponent component, int x, int y) {
         constraints.gridx = x;
         constraints.gridy = y;
         panel.add(component, constraints);
     }
 
+
+    // Ajoute un champ de formulaire avec une largeur spécifiée au panneau
     private void addFormField(JPanel panel, GridBagConstraints constraints, JComponent component, int x, int y, int width) {
         constraints.gridx = x;
         constraints.gridy = y;
@@ -116,6 +128,8 @@ public class LoginPage extends JFrame {
         panel.add(component, constraints);
     }
 
+
+    // Gère l'événement de connexion
     private void handleLogin() {
         String username = usernameField.getText();
         char[] passwordChars = passwordField.getPassword();
@@ -145,6 +159,8 @@ public class LoginPage extends JFrame {
         }
     }
 
+
+    // Affiche un message avec une durée spécifiée
     private void showMessage(String message, String title, int messageType, int duration) {
         JOptionPane optionPane = new JOptionPane(message, messageType);
         JDialog dialog = optionPane.createDialog(title);
@@ -161,6 +177,8 @@ public class LoginPage extends JFrame {
         dialog.setVisible(true);
     }
 
+
+    // Authentifie l'utilisateur avec la base de données
     private boolean authenticate(String username, String password, String role) {
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root")) {
             String query = "SELECT * FROM users WHERE username = ? AND password = ? AND role = ?";
@@ -178,11 +196,14 @@ public class LoginPage extends JFrame {
         return false;
     }
 
+
+    // Renvoie le rôle actuel de l'utilisateur
     public static String getCurrentUserRole() {
         return currentUserRole;
     }
 
-    // Custom JPanel for background image with transparency
+
+    // JPanel personnalisé pour l'image de fond avec transparence
     private class TransparentPanel extends JPanel {
         public TransparentPanel() {
             setOpaque(false);

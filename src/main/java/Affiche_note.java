@@ -144,7 +144,6 @@ public class Affiche_note {
             }
         };
 
-
         ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage();
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
@@ -161,6 +160,7 @@ public class Affiche_note {
         }
     }
 
+
     // connexion base de donnée
     private void establishDatabaseConnection() {
         try {
@@ -171,11 +171,15 @@ public class Affiche_note {
         }
     }
 
+
+    // Définir les icônes
     private void setIcons() {
         ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
+
+    // Calculer et afficher les notes
     private void calculateAndDisplayNotes(DefaultTableModel noteTableModel) {
         for (int row = 0; row < tableModel.getRowCount(); row++) {
             String etudiant1 = tableModel.getValueAt(row, 2).toString();
@@ -205,7 +209,7 @@ public class Affiche_note {
         }
     }
 
-    // on recupere le nom du projet
+    // Récupérer le nom du projet
     private String getProjectName(int projectNumber) {
         try {
             String query = "SELECT nom_matiere FROM Projets WHERE numero = ?";
@@ -222,7 +226,8 @@ public class Affiche_note {
         return "";
     }
 
-    //on recupere la date de remise
+
+    // Récupérer la date de remise
     static String getDateRemise(int projectNumber) {
         try {
             String query = "SELECT date_remise FROM Projets WHERE numero = ?";
@@ -240,7 +245,7 @@ public class Affiche_note {
     }
 
 
-    // calcul pour le nombre jours de retard
+    // Calculer le nombre de jours de retard
     private int calculateDaysOfDelay(java.sql.Date dateRemise, java.sql.Date dateRemiseEffective) {
         try {
             long diff = dateRemiseEffective.getTime() - dateRemise.getTime();
@@ -252,7 +257,7 @@ public class Affiche_note {
     }
 
 
-    // generer un pdf
+    // Générer un PDF
     private void generatePDF(DefaultTableModel noteTableModel) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Enregistrer le PDF");
@@ -301,5 +306,4 @@ public class Affiche_note {
             }
         }
     }
-
 }

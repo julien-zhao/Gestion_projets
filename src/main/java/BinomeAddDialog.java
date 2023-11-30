@@ -23,6 +23,8 @@ public class BinomeAddDialog extends JFrame {
     private int projectNumber = -1;
     private Set<String> studentsInBinome = new HashSet<>();
 
+
+    // Constructeur de la classe BinomeAddDialog
     public BinomeAddDialog(Connection connection, JFrame parentFrame, DefaultTableModel tableModel, int projectNumber) {
         this.connection = connection;
         this.parentFrame = parentFrame;
@@ -80,7 +82,7 @@ public class BinomeAddDialog extends JFrame {
         ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
         setIconImage(icon.getImage());
 
-        //button pour valider
+        //Button pour valider
         validerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -138,7 +140,8 @@ public class BinomeAddDialog extends JFrame {
             }
         });
 
-        //button pour effacer le contenu
+
+        //Button pour effacer le contenu
         effacerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -155,6 +158,8 @@ public class BinomeAddDialog extends JFrame {
         setVisible(true);
     }
 
+
+    // Méthode pour obtenir l'ID de l'étudiant
     private int getStudentId(String studentName) {
         int studentId = -1;
         try {
@@ -176,6 +181,8 @@ public class BinomeAddDialog extends JFrame {
         return studentId;
     }
 
+
+    // Méthode pour vérifier le format de la date
     private boolean isValidDateFormat(String date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setLenient(false);
@@ -188,6 +195,8 @@ public class BinomeAddDialog extends JFrame {
         }
     }
 
+
+    // Méthode pour obtenir l'ID du dernier binôme inséré
     private int getLastInsertedBinomeId() {
         int binomeId = -1;
         try {
@@ -204,7 +213,7 @@ public class BinomeAddDialog extends JFrame {
     }
 
 
-// on obtient la liste des étudiants
+    // Méthode pour obtenir la liste des options d'étudiants
     private DefaultComboBoxModel<String> getStudentOptions() {
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         try {
@@ -229,8 +238,7 @@ public class BinomeAddDialog extends JFrame {
     }
 
 
-
-    // si la note est entre 0 et 20
+    // Méthode pour vérifier si la note est entre 0 et 20
     private boolean isValidGrade(String grade) {
         try {
             double value = Double.parseDouble(grade);
@@ -240,6 +248,7 @@ public class BinomeAddDialog extends JFrame {
         }
     }
 
+    // Méthode pour initialiser les étudiants dans le binôme
     private void initializeStudentsInBinome() {
         try {
             String name = "project_" + projectNumber;
@@ -257,5 +266,4 @@ public class BinomeAddDialog extends JFrame {
             ex.printStackTrace();
         }
     }
-
 }

@@ -35,6 +35,7 @@ public class Menu {
 
     }
 
+    // Initialise la fenêtre principale
     private void initializeFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 700);
@@ -48,6 +49,7 @@ public class Menu {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    // Ajoute le titre à la fenêtre principale
     private void addTitleLabel() {
         JLabel titleLabel = new JLabel(" Gestion de projets des étudiants");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 45));
@@ -62,6 +64,7 @@ public class Menu {
     }
 
 
+    // Définit l'arrière-plan du contenu de la fenêtre
     private void setContentPaneBackground() {
         frame.setContentPane(new JPanel() {
             @Override
@@ -76,19 +79,27 @@ public class Menu {
         });
     }
 
+
+    // Définit la transparence du panneau
     private void setPanelTransparency() {
         panel2.setOpaque(false);
     }
 
+
+    // Ajoute les panneaux à la fenêtre
     private void addPanelsToFrame() {
         frame.add(panel2);
     }
 
+
+    // Définit les icônes de la fenêtre
     private void setIcons() {
         ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
+
+    // Ajoute les libellés au panneau2
     private void addLabelsToPanel2() {
         ImageIcon etudiantsIcon = new ImageIcon("src/Picture/etu.png");
         ImageIcon projetsIcon = new ImageIcon("src/Picture/proj.png");
@@ -114,10 +125,12 @@ public class Menu {
         panel2.add(gestionProjetLabel, gbc2);
     }
 
+
+    // Ajoute le bouton de déconnexion à la fenêtre
     private void addLogoutButton() {
         JButton logoutButton = new JButton("Déconnexion");
 
-        // 设置按钮的字体，背景颜色和前景颜色
+        // Définit la police, la couleur de fond et la couleur avant-plan du bouton
         Font buttonFont = new Font("Arial", Font.BOLD, 14);
         logoutButton.setFont(buttonFont);
         logoutButton.setBackground(new Color(255, 182, 193)); // 浅红色的 RGB 值
@@ -152,7 +165,7 @@ public class Menu {
     }
 
 
-
+    // Crée un libellé stylisé avec une icône
     private JLabel createStyledButton(String text, ImageIcon icon) {
         JLabel label = new JLabel(text);
 

@@ -35,86 +35,108 @@ import javax.swing.table.*;
 
 
 public class Gestion_etudiant{
+    // Connexion à la base de données
     private static Connection connection = null;
+
+    // Modèle de table par défaut
     private static DefaultTableModel tableModel;
+
+    // Panneau principal
     JPanel mainPanel = new JPanel(new BorderLayout());
+
+    // Cadre principal
     JFrame frame = new JFrame("Gestion des étudiants");
+
+    // Champ de recherche
     JTextField searchField = new JTextField(20);
+
+    // Boutons
     private JButton addStudentButton;
     private JButton deleteStudentButton;
     private JButton generatePDFButton;
     private JButton afficheMoyenneButton;
     private JButton retourMenuButton;
 
-
-
-    Gestion_etudiant(){
-
+    // Constructeur
+    Gestion_etudiant() {
+        // Établir la connexion à la base de données
         establishDatabaseConnection();
 
+        // Configurer le cadre principal
         setupMainFrame();
 
+        // Configurer les icônes
         setIcons();
 
+        // Créer et configurer la table des étudiants
         createAndConfigureStudentTable();
 
+        // Configurer les boutons
         configureButtons();
 
+        // Configurer le champ de recherche
         configureSearchField();
 
+        // Configurer le panneau nord
         JPanel northPanel = configureNorthPanel();
 
+        // Configurer le panneau sud
         JPanel southPanel = configureSouthPanel();
 
+        // Ajouter un écouteur pour le bouton de retour au menu
         addReturnMenuListener();
 
-
+        // Créer la table des étudiants et ajouter une barre de défilement
         JTable studentTable = createAndConfigureStudentTable();
         JScrollPane tableScrollPane = new JScrollPane(studentTable);
         tableScrollPane.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(15, 20, 0, 20), // 设置边框
-                BorderFactory.createLineBorder(new Color(108, 190, 213), 2,true) // 使用RGB颜色设置柔和的边框
+                BorderFactory.createEmptyBorder(15, 20, 0, 20),
+                BorderFactory.createLineBorder(new Color(108, 190, 213), 2, true)
         ));
 
-
-        // Ajout des composants au panneau principal
+        // Ajouter des composants au panneau principal
         LogoDauphine logoDauphine = new LogoDauphine();
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Recherche : "));
         searchPanel.add(searchField);
 
-
+        // Configurer les colonnes invisibles
         TableColumnModel tableColumnModel = studentTable.getColumnModel();
         tableColumnModel.getColumn(0).setMaxWidth(0);
         tableColumnModel.getColumn(0).setMinWidth(0);
         tableColumnModel.getColumn(0).setPreferredWidth(0);
         tableColumnModel.getColumn(0).setResizable(false);
 
+        // Configurer le panneau nord
         northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
         northPanel.add(logoDauphine);
         northPanel.add(searchPanel);
-        northPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
+        northPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));
 
-
+        // Configurer le panneau sud
         southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         southPanel.add(addStudentButton);
         southPanel.add(deleteStudentButton);
         southPanel.add(generatePDFButton);
         southPanel.add(afficheMoyenneButton);
         southPanel.add(retourMenuButton);
-        southPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));  // 调整边缘的距离
+        southPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
+        // Ajouter les panneaux au panneau principal
         mainPanel.add(northPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(southPanel, BorderLayout.SOUTH);
 
+        // Ajouter le panneau principal au cadre
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
+
+        // Charger les étudiants depuis la base de données
         loadStudentsFromDatabase();
 
-
+        // Filtre de formation
         JComboBox<String> formationFilter = new JComboBox<>();
         formationFilter.addItem("All");
         formationFilter.addItem("ID");
@@ -134,8 +156,7 @@ public class Gestion_etudiant{
         });
         northPanel.add(formationFilter);
 
-
-
+        // Filtre de promotion
         JComboBox<String> promotionFilter = new JComboBox<>();
         promotionFilter.addItem("All");
         promotionFilter.addItem("Initial");
@@ -155,8 +176,7 @@ public class Gestion_etudiant{
         });
         northPanel.add(promotionFilter);
 
-
-
+        // Ajouter un écouteur de souris
         MouseListener mouseListener = new MouseAdapter() {
             private JDialog dialog;
 
@@ -189,6 +209,7 @@ public class Gestion_etudiant{
 
         };
 
+        // Cacher les boutons pour le rôle étudiant
         if ("student".equals(LoginPage.getCurrentUserRole())) {
             // Si le rôle est étudiant, le bouton est caché
             addStudentButton.setVisible(false);
@@ -197,6 +218,7 @@ public class Gestion_etudiant{
             afficheMoyenneButton.setVisible(false);
         }
 
+        // Ajouter l'icône d'aide
         ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage(); // 转换为Image对象
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
@@ -206,7 +228,7 @@ public class Gestion_etudiant{
         reminderLabel.addMouseListener(mouseListener);
         southPanel.add(reminderLabel, BorderLayout.EAST);
 
-        // recherche rapide
+        // Filtrer la table en fonction de la recherche rapide
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -223,6 +245,7 @@ public class Gestion_etudiant{
             }
         });
 
+        // Ajouter un écouteur pour le bouton d'ajout d'étudiant
         addStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -231,7 +254,7 @@ public class Gestion_etudiant{
             }
         });
 
-
+        // Ajouter un écouteur pour le bouton de suppression d'étudiant
         deleteStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -273,7 +296,7 @@ public class Gestion_etudiant{
             }
         });
 
-
+        // Ajouter un écouteur pour le bouton d'affichage de la moyenne
         afficheMoyenneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -281,6 +304,7 @@ public class Gestion_etudiant{
             }
         });
 
+        // Ajouter un écouteur pour le bouton de génération PDF
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -290,9 +314,7 @@ public class Gestion_etudiant{
     }
 
 
-
-
-
+    // Méthode pour charger les étudiants depuis la base de données
     private static void loadStudentsFromDatabase() {
         try {
             // Créez une requête SQL pour récupérer les étudiants
@@ -321,7 +343,6 @@ public class Gestion_etudiant{
     }
 
 
-
     // Méthode pour récupérer le nom de la formation en fonction de l'ID
     private static String getFormation(int formationId) {
         try {
@@ -338,7 +359,6 @@ public class Gestion_etudiant{
         }
         return "";
     }
-
 
 
     // Méthode pour récupérer la promotion en fonction de l'ID de la formation
@@ -415,6 +435,9 @@ public class Gestion_etudiant{
             }
         }
     }
+
+
+    // Configurer et créer la table des étudiants
     private JTable createAndConfigureStudentTable() {
         String[] columnNames = {"ID", "Nom", "Prénom", "Formation", "Promotion"};
         tableModel = new DefaultTableModel(columnNames, 0); // Utilisation du modèle de données
@@ -468,7 +491,7 @@ public class Gestion_etudiant{
     }
 
 
-
+    // Établir la connexion à la base de données
     public static void establishDatabaseConnection() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
@@ -479,7 +502,7 @@ public class Gestion_etudiant{
     }
 
 
-
+    // Initialisation de la fenêtre principale
     private void setupMainFrame() {
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -492,18 +515,18 @@ public class Gestion_etudiant{
     }
 
 
+    // Configuration de l'icône de la fenêtre
     private void setIcons() {
         ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
-
+    // Configuration du panneau nord
     private JPanel configureNorthPanel() {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
         return northPanel;
     }
-
 
 
     private JPanel configureSouthPanel() {
@@ -517,7 +540,7 @@ public class Gestion_etudiant{
     }
 
 
-
+    // Configuration du panneau nord
     private void configureSearchField() {
         JTextField searchField = new JTextField(20);
         searchField.setToolTipText("Recherche rapide");
@@ -525,7 +548,7 @@ public class Gestion_etudiant{
     }
 
 
-
+    // Configuration du panneau sud avec des boutons spécifiques
     private void configureButtons() {
         addStudentButton = new JButton("Ajouter Étudiant");
         deleteStudentButton = new JButton("Supprimer Étudiant");
@@ -535,6 +558,7 @@ public class Gestion_etudiant{
     }
 
 
+    // Ajout d'un auditeur pour le bouton de retour au menu
     private void addReturnMenuListener() {
         retourMenuButton.addActionListener(new ActionListener() {
             @Override
@@ -546,6 +570,7 @@ public class Gestion_etudiant{
     }
 
 
+    // Obtention du nombre maximal de projets à partir de la base de données
     private int getMaxProjectNumber() {
         try {
             String query = "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(table_name, '_', -1), '_', 1) AS SIGNED)) FROM information_schema.tables WHERE table_name LIKE 'project_%'";
@@ -560,6 +585,8 @@ public class Gestion_etudiant{
         }
     }
 
+
+    // Vérification si un étudiant est dans un binôme
     private boolean isStudentInBinome(int studentId) {
         try {
             int maxProjectNumber = getMaxProjectNumber();
@@ -590,6 +617,8 @@ public class Gestion_etudiant{
         }
     }
 
+
+    // Vérification de l'existence d'une table dans la base de données
     private boolean isTableExists(String tableName) throws SQLException {
         String query = "SELECT 1 FROM information_schema.tables WHERE table_name = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {

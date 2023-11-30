@@ -41,26 +41,24 @@ public class Affiche_moyenne {
 
 
     public Affiche_moyenne() {
+        // Établir la connexion à la base de données
         establishDatabaseConnection();
+        // Initialiser le modèle de tableau
         initializeTableModel();
+        // Créer et afficher le cadre
         createAndShowFrame();
+        // Définir les icônes
         setIcons();
+        // Ajouter les boutons de génération de PDF et d'exportation
         addGeneratePdfAndExportButtons();
+        // Afficher le tableau des moyennes
         afficherTableauMoyennes();
-
     }
-
-
-
-
-
-
-
-
 
 
     private void establishDatabaseConnection() {
         try {
+            // Connexion à la base de données MySQL
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -68,16 +66,22 @@ public class Affiche_moyenne {
         }
     }
 
+
     private void initializeTableModel() {
+        // Initialiser le modèle de tableau par défaut
         tableModel = new DefaultTableModel();
     }
 
+
     private void createAndShowFrame() {
+        // Créer le cadre principal
         frame = new JFrame("Tableau des moyennes");
         frame.setLayout(new BorderLayout());
 
-        JTable studentTable = createAndConfigureStudentTable();  // Use the method to create and configure the JTable
+        // Créer et configurer le tableau des étudiants
+        JTable studentTable = createAndConfigureStudentTable();
         JScrollPane tableScrollPane = new JScrollPane(studentTable);
+        // Définir les bordures du tableau
         tableScrollPane.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(15, 20, 0, 20),
                 BorderFactory.createLineBorder(new Color(108, 190, 213), 2, true)
@@ -86,7 +90,7 @@ public class Affiche_moyenne {
 
         frame.setSize(1000, 700);
 
-        // Center the frame on the screen
+        // Centrer le cadre sur l'écran
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - frame.getWidth()) / 2;
         int y = (screenSize.height - frame.getHeight()) / 2;
@@ -97,15 +101,15 @@ public class Affiche_moyenne {
     }
 
 
-
     private JTable createAndConfigureStudentTable() {
-
+        // Créer et configurer le tableau des étudiants
         JTable studentTable = new JTable(tableModel);
         studentTable.setShowGrid(false);
 
         JTableHeader header = studentTable.getTableHeader();
+        // Définir la couleur d'arrière-plan de l'en-tête
         header.setBackground(new Color(108, 190, 213));
-        header.setForeground(Color.WHITE); // 设置列头前景颜色
+        header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));
 
         studentTable.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -135,8 +139,8 @@ public class Affiche_moyenne {
         // Ajouter les colonnes nécessaires
         tableModel.addColumn("Nom Étudiant");
 
-        // Récupérer la liste des projets
         try {
+            // Récupérer la liste des projets
             Statement statement = connection.createStatement();
             ResultSet resultSetProjets = statement.executeQuery("SELECT numero, nom_matiere FROM Projets");
 
@@ -191,9 +195,6 @@ public class Affiche_moyenne {
 
                 // Ajouter la ligne de données au modèle du tableau
                 tableModel.addRow(rowData);
-
-
-
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -205,11 +206,13 @@ public class Affiche_moyenne {
 
 
     private void setIcons() {
+        // Définir l'icône du cadre
         ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
     private void addGeneratePdfAndExportButtons() {
+        // Ajouter les boutons de génération de PDF et d'exportation
         JButton generatePdfButton = new JButton("Générer PDF");
         generatePdfButton.addActionListener(new ActionListener() {
             @Override
@@ -238,11 +241,11 @@ public class Affiche_moyenne {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(generatePdfButton);
         buttonPanel.add(exportExcelButton);
-        buttonPanel.add(generateGraphButton);  // Ajouter le nouveau bouton
+        buttonPanel.add(generateGraphButton);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         frame.add(buttonPanel, BorderLayout.SOUTH);
-
     }
+
 
     private double getNoteRapport(int etudiantId, int projectNumber) throws SQLException {
         String tableName = "project_" + projectNumber;
@@ -345,6 +348,7 @@ public class Affiche_moyenne {
         return null;
     }
 
+
     // generer un pdf
     private void generatePDF(DefaultTableModel noteTableModel) {
         JFileChooser fileChooser = new JFileChooser();
@@ -394,6 +398,7 @@ public class Affiche_moyenne {
             }
         }
     }
+
 
     private void exportToExcel(DefaultTableModel model) {
         JFileChooser fileChooser = new JFileChooser();
@@ -445,9 +450,6 @@ public class Affiche_moyenne {
     }
 
 
-
-
-
     private void generateGraph() {
         // Créer un ensemble de données de catégorie
         CategoryDataset dataset = createDataset();
@@ -471,7 +473,6 @@ public class Affiche_moyenne {
     }
 
 
-
     private CategoryDataset createDataset() {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -481,7 +482,6 @@ public class Affiche_moyenne {
             double moyenne = Double.parseDouble(tableModel.getValueAt(row, tableModel.getColumnCount() - 1).toString());
             dataset.addValue(moyenne, "Étudiants", etudiant);
         }
-
         return dataset;
     }
 

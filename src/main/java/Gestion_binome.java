@@ -32,14 +32,18 @@ public class Gestion_binome {
 
         this.projectNumber = projectNumber;
 
+        // Établir la connexion à la base de données
         establishDatabaseConnection();
 
+        // Configuration de l'interface utilisateur principale
         setupMainFrame();
 
+        // Configuration des icônes
         setIcons();
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
+        // Noms des colonnes du tableau
         String[] columnNames = {"ID", "Projet", "Étudiant 1", "Étudiant 2", "Note Rapport", "Note Soutenance Étudiant 1", "Note Soutenance Étudiant 2", "Date de Remise Effective"};
         tableModel = new DefaultTableModel(columnNames, 0);
 
@@ -49,9 +53,7 @@ public class Gestion_binome {
 
         binomeTable.setShowGrid(false);
 
-
-
-
+        // Créer un trieur insensible à la casse
         TableRowSorter<DefaultTableModel> caseInsensitiveSorter = new TableRowSorter<>(tableModel) {
             @Override
             public Comparator<?> getComparator(int column) {
@@ -64,18 +66,18 @@ public class Gestion_binome {
         binomeTable.setRowSorter(caseInsensitiveSorter);
         JScrollPane tableScrollPane = new JScrollPane(binomeTable);
 
-        // 创建搜索字段
+        // Créer le champ de recherche
         JTextField searchField = new JTextField(20);
         searchField.setToolTipText("Recherche rapide"); // 提示用户的工具提示文本
 
-        // 创建按钮
+        // Créer les boutons
         JButton addBinomeButton = new JButton("Ajouter Binôme");
         JButton deleteBinomeButton = new JButton("Supprimer Binôme");
         JButton afficheNoteButton = new JButton("Affiche note");
         JButton generatePDFButton = new JButton("Générer en PDF");
         JButton retourProjectButton = new JButton("Retour au Project");
 
-        // 隐藏ID和项目列
+        // Cacher les colonnes "ID" et "Projet"
         TableColumnModel tableColumnModel = binomeTable.getColumnModel();
         tableColumnModel.getColumn(0).setMaxWidth(0);
         tableColumnModel.getColumn(0).setMinWidth(0);
@@ -86,7 +88,7 @@ public class Gestion_binome {
         tableColumnModel.getColumn(1).setPreferredWidth(0);
         tableColumnModel.getColumn(1).setResizable(false);
 
-        // recherche rapide
+        // Configuration du champ de recherche
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -104,7 +106,7 @@ public class Gestion_binome {
         });
 
 
-        // button retour
+        // Configuration du bouton de retour
         retourProjectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -115,6 +117,7 @@ public class Gestion_binome {
             }
         });
 
+        // Configuration du panneau de boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.add(addBinomeButton);
         buttonPanel.add(deleteBinomeButton);
@@ -122,28 +125,33 @@ public class Gestion_binome {
         buttonPanel.add(generatePDFButton);
         buttonPanel.add(retourProjectButton);
 
-
+        // Configuration du panneau de recherche
         JPanel searchPanel = new JPanel();
         searchPanel.add(new JLabel("Recherche : "));
         searchPanel.add(searchField);
 
-
+        // Ajout des composants au panneau principal
         mainPanel.add(searchPanel, BorderLayout.NORTH);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 0, 20));  // 调整边缘的距离
 
+        // Ajout du panneau principal à la fenêtre
         frame.add(mainPanel);
         frame.pack();
         frame.setVisible(true);
 
+        // Vérifier si la table de binômes existe, sinon la créer
         boolean binomeTableExists = checkTableExistence(projectNumber);
 
         if (!binomeTableExists) {
             createBinomeTable(projectNumber);
         }
+
+        // Charger les binômes depuis la base de données
         loadBinomesFromDatabase(projectNumber);
 
+        // Configuration du bouton pour ajouter un binôme
         addBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -151,7 +159,7 @@ public class Gestion_binome {
             }
         });
 
-        //button supprimer
+        // Configuration du bouton pour supprimer un binôme
         deleteBinomeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -169,11 +177,11 @@ public class Gestion_binome {
                 }
             }
         });
-        // button aficher les notes
+
+        // Configuration du bouton pour afficher les notes
         afficheNoteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //JFrame frame;
                 new Affiche_note(tableModel,projectNumber);
             }
         });
@@ -240,6 +248,7 @@ public class Gestion_binome {
         binomeTable.getColumnModel().getColumn(5).setCellEditor(numberCellEditor); // Colonne "Note Soutenance Étudiant 1"
         binomeTable.getColumnModel().getColumn(6).setCellEditor(numberCellEditor); // Colonne "Note Soutenance Étudiant 2
 
+        // Configuration du listener pour les modifications du tableau
         binomeTable.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -251,6 +260,7 @@ public class Gestion_binome {
                     String columnName = binomeTable.getColumnName(column);
                     Object updatedValue = model.getValueAt(row, column);
 
+                    // Mise à jour des notes dans la base de données
                     if (columnName.equals("Note Rapport")) {
                         updateNoteRapport(binomeId, updatedValue);
                     } else if (columnName.equals("Note Soutenance Étudiant 1")) {
@@ -262,8 +272,7 @@ public class Gestion_binome {
             }
         });
 
-
-        // generer un pdf
+        // Configuration du bouton pour générer un PDF
         generatePDFButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -271,31 +280,36 @@ public class Gestion_binome {
             }
         });
 
+        // Configuration de l'en-tête du tableau
         JTableHeader header = binomeTable.getTableHeader();
         header.setBackground(new Color(108, 190, 213));
         header.setForeground(Color.WHITE); // 设置列头前景颜色
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 26));
 
-
+        // Configuration de l'en-tête du tableau
         binomeTable.setFont(new Font("Arial", Font.PLAIN, 12));
         binomeTable.setRowHeight(23);
 
-
+        // Configuration du rendu par défaut du tableau
         binomeTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
+                // Alternance des couleurs des lignes
                 if (row % 2 == 0) {
                     c.setBackground(new Color(240, 240, 240));
                 } else {
                     c.setBackground(Color.WHITE);
                 }
+
+                // Couleur de fond pour les lignes sélectionnées
                 if (isSelected) {
                     c.setBackground(new Color(173, 216, 230));
                 }
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
 
+                // Couleur de fond pour les colonnes de notes
                 if (column == 4 || column == 5 || column == 6) {
                     c.setBackground(new Color(255, 200, 200));
                 }
@@ -303,6 +317,7 @@ public class Gestion_binome {
                 return c;
             }
         });
+        // Ajout de l'aide au survol
         MouseListener mouseListener = new MouseAdapter() {
             private JDialog dialog;
 
@@ -337,14 +352,13 @@ public class Gestion_binome {
             }
         };
 
-
-        //Aide功能实现
+        // Fonctionnalité Aide
         ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
         Image image = imageIcon.getImage();
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
         imageIcon = new ImageIcon(newImage);
         JLabel reminderLabel = new JLabel(imageIcon);
-        reminderLabel.addMouseListener(mouseListener); // 添加鼠标事件监听器
+        reminderLabel.addMouseListener(mouseListener);
         buttonPanel.add(reminderLabel, BorderLayout.EAST);
 
 
@@ -357,9 +371,7 @@ public class Gestion_binome {
     }
 
 
-
-
-    // connexion base de donnée
+    // Connexion à la base de données
     private void establishDatabaseConnection() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/gestion_projets", "root", "root");
@@ -369,18 +381,22 @@ public class Gestion_binome {
         }
     }
 
+
+    // Définir les icônes
     private void setIcons() {
         ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
         frame.setIconImage(customIcon.getImage());
     }
 
+
+    // Configuration de la fenêtre principale
     private void setupMainFrame() {
         frame = new JFrame("Gestion des Binômes du projet : " + getProjectName(projectNumber));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1000, 700));
-        // 添加这一行确保窗口的大小已经被正确设置
+        // Ajouter cette ligne pour s'assurer que la taille de la fenêtre est correctement définie
         frame.pack();
-        // 将窗口设置为屏幕中央
+        // Définir la fenêtre au centre de l'écran
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - frame.getWidth()) / 2;
         int y = (screenSize.height - frame.getHeight()) / 2;
@@ -388,6 +404,7 @@ public class Gestion_binome {
     }
 
 
+    // Mise à jour de la note de rapport
     private void updateNoteRapport(int binomeId, Object updatedValue) {
         if ("student".equals(LoginPage.getCurrentUserRole())) {
             // Si le rôle est étudiant, ne permettez pas la modification
@@ -407,6 +424,7 @@ public class Gestion_binome {
     }
 
 
+    // Mise à jour de la note de soutenance pour l'étudiant 1
     private void updateNoteSoutenanceEtu1(int binomeId, Object updatedValue) {
         if ("student".equals(LoginPage.getCurrentUserRole())) {
             // Si le rôle est étudiant, ne permettez pas la modification
@@ -426,6 +444,7 @@ public class Gestion_binome {
     }
 
 
+    // Mise à jour de la note de soutenance pour l'étudiant 2
     private void updateNoteSoutenanceEtu2(int binomeId, Object updatedValue) {
         if ("student".equals(LoginPage.getCurrentUserRole())) {
             // Si le rôle est étudiant, ne permettez pas la modification
@@ -445,7 +464,7 @@ public class Gestion_binome {
     }
 
 
-    // supprimer un binome
+    // Supprimer un binôme
     private void deleteBinome(int binomeId) {
         try {
             String tableName = "Project_" + projectNumber;
@@ -463,6 +482,7 @@ public class Gestion_binome {
     }
 
 
+    // Obtenir l'indice de ligne par ID
     private int getRowIndexById(int binomeId) {
         for (int row = 0; row < tableModel.getRowCount(); row++) {
             int id = (int) tableModel.getValueAt(row, 0);
@@ -474,9 +494,9 @@ public class Gestion_binome {
     }
 
 
-    // chargement base de donnée
+    // Chargement de la base de données des binômes
     private static void loadBinomesFromDatabase(int projectNumber) {
-        tableModel.setRowCount(0); // 清空表中的现有行
+        tableModel.setRowCount(0);
         try {
             String sql = "SELECT * FROM Project_" + projectNumber;
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -505,6 +525,8 @@ public class Gestion_binome {
         }
     }
 
+
+    // Vérifier l'existence de la table
     private boolean checkTableExistence(int projectNumber) {
         try {
             DatabaseMetaData metaData = connection.getMetaData();
@@ -516,6 +538,8 @@ public class Gestion_binome {
         }
     }
 
+
+    // Créer une table de binômes
     private void createBinomeTable(int projectNumber) {
         try {
             Statement statement = connection.createStatement();
@@ -538,6 +562,7 @@ public class Gestion_binome {
     }
 
 
+    // Obtenir le nom du projet
     private static String getProjectName(int projectId) {
         try {
             String query = "SELECT nom_matiere FROM Projets WHERE numero = ?";
@@ -554,6 +579,8 @@ public class Gestion_binome {
         return "";
     }
 
+
+    // Obtenir le nom de l'étudiant
     private static String getStudentName(int studentId) {
         try {
             String query = "SELECT nom, prenom FROM Etudiants WHERE numero = ?";
@@ -572,11 +599,16 @@ public class Gestion_binome {
         return "";
     }
 
+
+    // Filtrer la table
     private void filterTable(String searchText, JTable binomeTable) {
         RowFilter<DefaultTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + searchText, 1,2, 3,4,5,6,7,8);
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) binomeTable.getRowSorter();
         sorter.setRowFilter(rowFilter);
     }
+
+
+    // Générer un PDF
     private void generatePDF() {
         // 打开文件选择器
         JFileChooser fileChooser = new JFileChooser();
@@ -626,7 +658,6 @@ public class Gestion_binome {
 
                 document.add(pdfTable);
                 document.close();
-
 
                 JOptionPane.showMessageDialog(frame, "Le PDF a été généré avec succès et enregistré dans " + fileToSave.getAbsolutePath(), "PDF généré", JOptionPane.INFORMATION_MESSAGE);
             } catch (DocumentException | IOException e) {
