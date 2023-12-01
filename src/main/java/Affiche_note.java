@@ -117,7 +117,7 @@ public class Affiche_note {
             public void mouseEntered(MouseEvent e) {
                 dialog = new JDialog((JFrame) null, "Aide", false);
 
-                ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+                ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
                 dialog.setIconImage(icon.getImage());
 
                 int xOffset = 10;
@@ -146,7 +146,7 @@ public class Affiche_note {
 
 
         // Ajouter l'icône d'aide
-        ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
+        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/Picture/wenhao.jpeg"));
         Image image = imageIcon.getImage();
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
         imageIcon = new ImageIcon(newImage);
@@ -176,7 +176,7 @@ public class Affiche_note {
 
     // Définir les icônes
     private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         frame.setIconImage(customIcon.getImage());
     }
 

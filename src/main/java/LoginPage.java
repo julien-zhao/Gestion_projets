@@ -24,16 +24,19 @@ public class LoginPage extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setContentPane(new TransparentPanel(new BorderLayout())); // Use BorderLayout for the main panel
+        setContentPane(new TransparentPanel(new BorderLayout())); // Utilisez BorderLayout pour le panneau principal
 
         JPanel panel = createMainPanel();
         add(panel);
 
         setVisible(true);
 
-        Image iconImage = new ImageIcon("src/Picture/logo_D.jpg").getImage();
+        // Chargement de l'image depuis le classpath
+        ImageIcon icon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
+        Image iconImage = icon.getImage();
         setIconImage(iconImage);
     }
+
 
 
     // Crée le panneau principal
@@ -218,10 +221,15 @@ public class LoginPage extends JFrame {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f)); // Adjust the transparency here
-            Image bgImage = new ImageIcon("src/Picture/uni_logo.jpeg").getImage();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f)); // Ajustez la transparence ici
+
+            // Chargement de l'image depuis le classpath
+            ImageIcon imageIcon = new ImageIcon(getClass().getResource("/Picture/uni_logo.jpeg"));
+            Image bgImage = imageIcon.getImage();
+
             g2d.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
             g2d.dispose();
         }
+
     }
 }

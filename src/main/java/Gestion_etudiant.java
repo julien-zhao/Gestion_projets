@@ -223,7 +223,7 @@ public class Gestion_etudiant{
         }
 
         // Ajouter l'icône d'aide
-        ImageIcon imageIcon = new ImageIcon("src/Picture/wenhao.jpeg");
+        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/Picture/wenhao.jpeg"));
         Image image = imageIcon.getImage(); // 转换为Image对象
         Image newImage = image.getScaledInstance(15, 15,  java.awt.Image.SCALE_SMOOTH); // 调整图像大小
         imageIcon = new ImageIcon(newImage); // 重新生成ImageIcon
@@ -521,7 +521,7 @@ public class Gestion_etudiant{
 
     // Configuration de l'icône de la fenêtre
     private void setIcons() {
-        ImageIcon customIcon = new ImageIcon("src/Picture/logo_D.jpg");
+        ImageIcon customIcon = new ImageIcon(getClass().getResource("/Picture/logo_D.jpg"));
         frame.setIconImage(customIcon.getImage());
     }
 

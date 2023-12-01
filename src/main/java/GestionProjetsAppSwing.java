@@ -11,7 +11,6 @@ import java.sql.SQLException;
 
 public class GestionProjetsAppSwing {
     public static void main(String[] args) {
-
         LoginPage loginPage = new LoginPage();
     }
 }
