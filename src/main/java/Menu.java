@@ -165,6 +165,7 @@ public class Menu {
     }
 
 
+
     // Crée un libellé stylisé avec une icône
     private JLabel createStyledButton(String text, ImageIcon icon) {
         JLabel label = new JLabel(text);
