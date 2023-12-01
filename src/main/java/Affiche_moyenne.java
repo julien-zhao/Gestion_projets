@@ -13,6 +13,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -449,7 +453,6 @@ public class Affiche_moyenne {
         }
     }
 
-
     private void generateGraph() {
         // Créer un ensemble de données de catégorie
         CategoryDataset dataset = createDataset();
@@ -459,18 +462,63 @@ public class Affiche_moyenne {
                 "Moyennes des étudiants",
                 "Étudiants",
                 "Moyennes",
-                dataset
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
         );
+
+        // Personnaliser les couleurs du graphique
+        barChart.setBackgroundPaint(new Color(240, 240, 240)); // Couleur de fond du graphique
+        CategoryPlot plot = barChart.getCategoryPlot();
+        plot.setBackgroundPaint(new Color(230, 230, 230)); // Couleur de fond du graphique à barres
+        plot.setDomainGridlinePaint(Color.white);
+        plot.setRangeGridlinePaint(Color.white);
+
+        // Personnaliser le renderer pour obtenir un effet mat
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setBarPainter(new StandardBarPainter()); // Désactiver les effets de reflet
+        renderer.setSeriesPaint(0, new Color(69, 144, 164)); // Couleur des barres
+
+        // Utiliser un GradientPaint pour un effet mat/froissé
+        GradientPaint gp = new GradientPaint(
+                0.0f, 0.0f, new Color(69, 144, 164), // Couleur de début
+                0.0f, 0.0f, new Color(173, 216, 230) // Couleur de fin
+        );
+        renderer.setSeriesPaint(0, gp);
+
+        // Personnaliser la police du graphique
+        Font titleFont = new Font("SansSerif", Font.BOLD, 18);
+        Font labelFont = new Font("SansSerif", Font.PLAIN, 14);
+        Font tickFont = new Font("SansSerif", Font.PLAIN, 12);
+
+        barChart.getTitle().setFont(titleFont);
+        plot.getDomainAxis().setLabelFont(labelFont);
+        plot.getRangeAxis().setLabelFont(labelFont);
+        plot.getDomainAxis().setTickLabelFont(tickFont);
+        plot.getRangeAxis().setTickLabelFont(tickFont);
 
         // Afficher le graphique dans une fenêtre
         JFrame chartFrame = new JFrame("Graphique des moyennes");
+
+        ImageIcon icon = new ImageIcon("src/Picture/logo_D.jpg");
+        chartFrame.setIconImage(icon.getImage());
+
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         ChartPanel chartPanel = new ChartPanel(barChart);
         chartPanel.setPreferredSize(new java.awt.Dimension(560, 370));
         chartFrame.setContentPane(chartPanel);
         chartFrame.pack();
         chartFrame.setVisible(true);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screenSize.width - chartFrame.getWidth()) / 2;
+        int y = (screenSize.height - chartFrame.getHeight()) / 2;
+        chartFrame.setLocation(x, y);
     }
+
+
 
 
     private CategoryDataset createDataset() {
