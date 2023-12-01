@@ -488,6 +488,7 @@ public class Affiche_moyenne {
         );
         renderer.setSeriesPaint(0, gp);
 
+
         // Personnaliser la police du graphique
         Font titleFont = new Font("SansSerif", Font.BOLD, 18);
         Font labelFont = new Font("SansSerif", Font.PLAIN, 14);
