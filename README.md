@@ -2,7 +2,7 @@
 
 ## Description
 
-**Gestion_projets** is a Java-based application designed to manage student projects efficiently. The software leverages Swing/JavaFX for the user interface and allows for storing data using formats like CSV, XML, JSON, or a MySQL database. It aims to simplify the management of student projects, ensuring seamless tracking and organization.
+**Project Manager_projets** is a Java-based application designed to manage student projects efficiently. The software leverages Swing/JavaFX for the user interface and allows for storing data using formats like CSV, XML, JSON, or a MySQL database. It aims to simplify the management of student projects, ensuring seamless tracking and organization.
 
 ## Features
 
