@@ -1,2 +1,27 @@
-# Gestion_projets
-Le projet Java consiste à créer une application simple avec une interface Swing/JavaFX pour gérer efficacement les projets étudiants, en utilisant Java pour le stockage des données via des fichiers CSV/XML/JSON ou une base de données MySQL.L. L'objectif est d'assurer une gestion efficace des projets étudiants.
+# Gestion des Projets Étudiants
+
+## Description
+
+**Gestion_projets** is a Java-based application designed to manage student projects efficiently. The software leverages Swing/JavaFX for the user interface and allows for storing data using formats like CSV, XML, JSON, or a MySQL database. It aims to simplify the management of student projects, ensuring seamless tracking and organization.
+
+## Features
+
+- **Student and Project Management**: Add, update, and view students and their associated projects.
+- **Data Persistence**: Store data in CSV, XML, JSON files, or MySQL database.
+- **Simple Interface**: Built with Swing/JavaFX for an intuitive user experience.
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/julien-zhao/Gestion_projets.git
+2. Build the project with Maven:
+   mvn clean install
+3. Run the application:
+   java -jar target/Gestion_projets.jar
+
+## Technologies Used
+
+Java
+Swing/JavaFX
+MySQL / CSV/XML/JSON (for data storage)
