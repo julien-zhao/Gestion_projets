@@ -21,7 +21,9 @@
    mvn clean install
    ```
 4. Run the application:
-   `java -jar target/Gestion_projets.jar`
+   ```bash
+   java -jar target/Gestion_projets.jar
+   ```
 
 ## Technologies Used
 
