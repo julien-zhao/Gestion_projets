@@ -16,9 +16,9 @@
    ```bash
    git clone https://github.com/julien-zhao/Gestion_projets.git
 2. Build the project with Maven:
-   mvn clean install
+   `mvn clean install`
 3. Run the application:
-   java -jar target/Gestion_projets.jar
+   `java -jar target/Gestion_projets.jar`
 
 ## Technologies Used
 
